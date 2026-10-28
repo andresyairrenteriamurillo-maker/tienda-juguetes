@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Juguetería | Juguetes con pedidos por WhatsApp</title>
   <meta name="description" content="Catálogo de juguetes con precios en pesos colombianos. Arma tu pedido, envíalo por WhatsApp y recógelo en la tienda.">
-  <meta name="theme-color" content="#1F4FE0">
+  <meta name="theme-color" content="#FFD23F">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Juguetería | Catálogo de juguetes">
   <meta property="og:description" content="Arma tu pedido de juguetes y envíalo por WhatsApp. Recogida en tienda.">
@@ -16,10 +16,7 @@
   <link rel="stylesheet" href="css/estilos.css">
 </head>
 <body>
-  <div class="barra-anuncio">
-    <span>🏪 Pide por WhatsApp y recoge gratis en la tienda</span>
-    <span class="barra-anuncio__demo" id="aviso-demo" hidden>Tienda de demostración: productos y precios de ejemplo</span>
-  </div>
+  <div class="aviso-demo" id="aviso-demo" hidden>Tienda de demostración: los productos y precios son ejemplos.</div>
 
   <header class="encabezado">
     <div class="contenedor encabezado__fila">
@@ -27,115 +24,86 @@
         <span class="logo__icono" aria-hidden="true">🧸</span>
         <span class="logo__nombre" data-config="nombre">Juguetería</span>
       </a>
-      <form class="buscador" id="form-buscar" role="search">
-        <label for="buscar" class="sr">Buscar juguetes</label>
-        <input id="buscar" type="search" placeholder="¿Qué juguete buscas?" autocomplete="off" maxlength="60">
-        <button type="submit" class="buscador__btn" aria-label="Buscar"><span data-icon="search"></span></button>
-      </form>
-      <a class="enlace-cabecera enlace-wa-consulta" target="_blank" rel="noopener">
-        <span data-icon="chat"></span><span class="enlace-cabecera__texto">Escríbenos</span>
-      </a>
       <button class="btn-carrito" id="abrir-carrito" aria-label="Abrir carrito">
-        <span class="btn-carrito__icono"><span data-icon="cart"></span><span class="contador" id="contador-carrito" aria-live="polite">0</span></span>
+        <span data-icon="cart"></span>
         <span class="btn-carrito__texto">Carrito</span>
+        <span class="contador" id="contador-carrito" aria-live="polite">0</span>
       </button>
     </div>
-    <nav class="barra-categorias" aria-label="Categorías">
-      <div class="contenedor barra-categorias__lista" id="nav-categorias"></div>
-    </nav>
   </header>
 
   <main>
-    <section class="contenedor portada" aria-label="Ofertas destacadas">
-      <a href="#ofertas" class="banner-principal">
-        <div class="banner-principal__texto">
-          <p class="banner-principal__antes">Esta semana en la tienda</p>
-          <h1>Ofertas que <span class="sin-salto">se juegan</span></h1>
-          <p class="banner-principal__desc" id="banner-desc">Descuentos en juguetes seleccionados.</p>
-          <span class="btn btn--amarillo">Ver ofertas</span>
+    <section class="hero">
+      <div class="contenedor hero__fila">
+        <div class="hero__texto">
+          <h1>Juguetes para jugar, regalar y sorprender</h1>
+          <p>Escoge tus juguetes, envíanos el pedido por WhatsApp y recógelo en la tienda.</p>
+          <a href="#catalogo" class="btn btn--primario btn--grande">Ver juguetes</a>
         </div>
-        <div class="banner-principal__arte" aria-hidden="true">
-          <span class="globo-dcto" id="banner-dcto">-20%</span>
-          <span class="arte arte--1">🧸</span><span class="arte arte--2">🚗</span><span class="arte arte--3">🎲</span><span class="arte arte--4">🤖</span>
+        <div class="bloques" aria-hidden="true">
+          <span class="bloque-toy t1">🚗</span>
+          <span class="bloque-toy t2">🧸</span>
+          <span class="bloque-toy t3">🎲</span>
+          <span class="bloque-toy t4">🤖</span>
+          <span class="bloque-toy t5">⚽</span>
+          <span class="bloque-toy t6">🎨</span>
         </div>
-      </a>
-      <div class="mosaico" id="mosaico"></div>
-    </section>
-
-    <section id="ofertas" class="contenedor seccion" aria-labelledby="titulo-ofertas">
-      <div class="seccion__cabecera">
-        <h2 id="titulo-ofertas">🔥 Ofertas</h2>
-        <button class="enlace-ver" data-categoria="__promo" data-ir="catalogo">Ver todas</button>
       </div>
-      <div class="carrusel" id="lista-ofertas"></div>
     </section>
 
-    <section id="catalogo" class="contenedor seccion" aria-labelledby="titulo-catalogo">
-      <div class="seccion__cabecera">
-        <h2 id="titulo-catalogo">🧸 Todos los juguetes</h2>
-        <label class="orden-etiqueta">Ordenar por
+    <section id="catalogo" class="catalogo contenedor" aria-labelledby="titulo-catalogo">
+      <div class="catalogo__cabecera">
+        <h2 id="titulo-catalogo">Nuestros juguetes</h2>
+        <div class="herramientas">
+          <form class="buscador" id="form-buscar" role="search">
+            <label for="buscar" class="sr">Buscar juguetes</label>
+            <span class="buscador__icono" data-icon="search"></span>
+            <input id="buscar" type="search" placeholder="Buscar" autocomplete="off" maxlength="60">
+          </form>
+          <label class="sr" for="orden">Ordenar</label>
           <select id="orden" class="orden">
             <option value="recomendados">Recomendados</option>
             <option value="menor">Menor precio</option>
             <option value="mayor">Mayor precio</option>
             <option value="nuevos">Más nuevos</option>
-            <option value="descuento">Mayor descuento</option>
           </select>
-        </label>
+        </div>
       </div>
-      <div class="chips" id="chips" role="group" aria-label="Filtrar por categoría"></div>
-      <p class="resultado" id="resultado" aria-live="polite"></p>
+      <div class="chips" id="chips" role="group" aria-label="Categorías"></div>
+      <p class="resultado sr" id="resultado" aria-live="polite"></p>
       <div class="rejilla" id="lista-catalogo"></div>
     </section>
 
-    <section class="beneficios" aria-label="Cómo comprar">
-      <div class="contenedor beneficios__fila">
-        <div class="beneficio"><span>🛒</span><div><strong>Arma tu carrito</strong><p>Sin registro ni contraseña.</p></div></div>
-        <div class="beneficio"><span>💬</span><div><strong>Envía por WhatsApp</strong><p>Te confirmamos disponibilidad.</p></div></div>
-        <div class="beneficio"><span>💵</span><div><strong>Paga como prefieras</strong><p>Efectivo o transferencia.</p></div></div>
-        <div class="beneficio"><span>🏪</span><div><strong>Recoge en tienda</strong><p>Sin costo de envío.</p></div></div>
-      </div>
-    </section>
-
-    <section id="tienda" class="contenedor seccion tienda">
-      <div class="tienda__info">
-        <h2>📍 Visítanos</h2>
-        <p class="tienda__dir"><span data-config="direccion"></span>, <span data-config="ciudad"></span></p>
-        <a id="enlace-mapa" class="enlace" target="_blank" rel="noopener" hidden>Ver en el mapa</a>
-        <p class="nota">Todos los pedidos se recogen en la tienda. No hacemos domicilios.</p>
-      </div>
-      <div class="tienda__horarios">
-        <h3>Horarios</h3>
-        <ul class="horarios" id="horarios"></ul>
+    <section id="tienda" class="tienda">
+      <div class="contenedor tienda__fila">
+        <div>
+          <h2>Así de fácil pides</h2>
+          <ol class="pasos">
+            <li>Agrega los juguetes al carrito.</li>
+            <li>Escribe tu nombre y elige si pagas en efectivo o por transferencia.</li>
+            <li>Envía el pedido por WhatsApp.</li>
+            <li>Te confirmamos y lo recoges en la tienda.</li>
+          </ol>
+        </div>
+        <div class="tarjeta-tienda">
+          <h2>Ven por tu pedido</h2>
+          <p class="tarjeta-tienda__dir"><span data-icon="pin"></span><span><span data-config="direccion"></span>, <span data-config="ciudad"></span></span></p>
+          <ul class="horarios" id="horarios"></ul>
+          <a id="enlace-mapa" class="enlace" target="_blank" rel="noopener" hidden>Ver en el mapa</a>
+          <p class="nota">Solo recogida en tienda. No hacemos domicilios.</p>
+        </div>
       </div>
     </section>
   </main>
 
   <footer class="pie">
-    <div class="contenedor pie__columnas">
-      <div>
-        <p class="pie__nombre"><span aria-hidden="true">🧸</span> <span data-config="nombre"></span></p>
-        <p data-config="eslogan"></p>
-      </div>
-      <div>
-        <h3>Contacto</h3>
-        <p>WhatsApp: <a class="enlace-wa-texto" target="_blank" rel="noopener"><span data-config="telefonoVisible"></span></a></p>
-        <p><a id="enlace-correo"><span data-config="correo"></span></a></p>
-        <p><span data-config="direccion"></span></p>
-      </div>
-      <div>
-        <h3>Categorías</h3>
-        <ul class="pie__lista" id="pie-categorias"></ul>
-      </div>
-      <div>
-        <h3>Información</h3>
-        <ul class="pie__lista">
-          <li><a href="privacidad.html">Política de datos personales</a></li>
-          <li><a href="#tienda">Horarios y dirección</a></li>
-        </ul>
-      </div>
+    <div class="contenedor pie__fila">
+      <p class="pie__nombre" data-config="nombre"></p>
+      <p>WhatsApp <a class="enlace-wa-texto" target="_blank" rel="noopener"><span data-config="telefonoVisible"></span></a></p>
+      <p><a id="enlace-correo"><span data-config="correo"></span></a></p>
+      <p><a href="privacidad.html">Política de datos personales</a></p>
+      <p>© <span id="anio"></span></p>
     </div>
-    <p class="pie__copy">© <span id="anio"></span> <span data-config="nombre"></span>. Precios en pesos colombianos. Disponibilidad sujeta a confirmación.</p>
   </footer>
 
   <a class="wa-flotante enlace-wa-consulta" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">
