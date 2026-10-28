@@ -44,6 +44,8 @@
     cash: '<rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>',
     check: '<path d="M20 6 9 17l-5-5"/>',
     eye: '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+    moon: '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>',
     grid: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>',
     tag: '<path d="M12.6 2.6A2 2 0 0 0 11.2 2H4a2 2 0 0 0-2 2v7.2a2 2 0 0 0 .6 1.4l8.7 8.7a2.4 2.4 0 0 0 3.4 0l6.6-6.6a2.4 2.4 0 0 0 0-3.4Z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>',
     share: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/>'
@@ -488,6 +490,22 @@
     $("#btn-finalizar").addEventListener("click", abrirPedido);
     $("#btn-vaciar").addEventListener("click", function () {
       if (window.confirm("¿Seguro que quieres vaciar el carrito?")) { vaciar(); aviso("Carrito vacío"); }
+    });
+
+    function pintarTema() {
+      var oscuro = document.documentElement.getAttribute("data-tema") === "oscuro";
+      var b = $("#btn-tema");
+      b.setAttribute("aria-pressed", oscuro ? "true" : "false");
+      b.setAttribute("aria-label", oscuro ? "Activar modo día" : "Activar modo noche");
+      var meta = $('meta[name="theme-color"]');
+      if (meta) meta.setAttribute("content", oscuro ? "#0F121C" : "#FFD54A");
+    }
+    pintarTema();
+    $("#btn-tema").addEventListener("click", function () {
+      var nuevo = document.documentElement.getAttribute("data-tema") === "oscuro" ? "claro" : "oscuro";
+      document.documentElement.setAttribute("data-tema", nuevo);
+      try { localStorage.setItem("tema", nuevo); } catch (e) { /* sin almacenamiento */ }
+      pintarTema();
     });
 
     $("#btn-buscar").addEventListener("click", function () {

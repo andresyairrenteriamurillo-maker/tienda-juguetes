@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="es-CO">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Panel de productos</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧸</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilos.css?v=10">
+  <link rel="stylesheet" href="css/admin.css?v=10">
+  <script>(function(){var t=null;try{t=localStorage.getItem("tema")}catch(e){}if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"oscuro":"claro";document.documentElement.setAttribute("data-tema",t)})();</script>
+</head>
+<body>
+  <header class="barra">
+    <div class="perfil-ancho barra__fila">
+      <a href="index.html" class="barra__marca">
+        <span class="barra__logo" aria-hidden="true">🧸</span>
+        <span class="barra__nombre">Mis productos</span>
+      </a>
+      <div class="barra__acciones">
+        <button class="icono-btn" id="btn-tema" aria-label="Cambiar modo noche"><span class="ico-luna" data-icon="moon"></span><span class="ico-sol" data-icon="sun"></span></button>
+        <a class="btn btn--gris btn-ver" href="index.html" target="_blank" rel="noopener">Ver tienda</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="perfil-ancho admin">
+    <!-- PASO 1: CONECTAR -->
+    <section id="vista-conectar" class="admin-tarjeta" hidden>
+      <h1>Conecta tu tienda</h1>
+      <p>Para guardar productos, este panel necesita una <strong>llave de acceso de GitHub</strong> con permiso solo para tu tienda. Se crea una vez y queda guardada únicamente en este dispositivo.</p>
+
+      <details class="ayuda" open>
+        <summary>Cómo crear la llave (2 minutos)</summary>
+        <ol>
+          <li>Abre <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a> con tu cuenta de GitHub.</li>
+          <li>En <strong>Token name</strong> escribe «Panel tienda». En <strong>Expiration</strong> elige el tiempo que quieras (por ejemplo 1 año).</li>
+          <li>En <strong>Repository access</strong> elige <strong>Only select repositories</strong> y selecciona <strong id="nombre-repo">tienda-juguetes</strong>.</li>
+          <li>En <strong>Permissions → Repository permissions → Contents</strong> elige <strong>Read and write</strong>.</li>
+          <li>Pulsa <strong>Generate token</strong>, copia la llave (empieza por <code>github_pat_</code>) y pégala aquí abajo.</li>
+        </ol>
+      </details>
+
+      <form id="form-conectar" class="campos-admin" autocomplete="off">
+        <div class="campo">
+          <label for="token">Llave de acceso</label>
+          <input id="token" type="password" placeholder="github_pat_..." spellcheck="false" required>
+        </div>
+        <label class="check"><input type="checkbox" id="recordar" checked> <span>Recordar en este dispositivo (no lo marques en computadores públicos)</span></label>
+        <p class="error" id="error-conectar" role="alert"></p>
+        <button class="btn btn--primario" type="submit" id="btn-conectar">Conectar</button>
+      </form>
+    </section>
+
+    <!-- PASO 2: PRODUCTOS -->
+    <section id="vista-productos" hidden>
+      <div class="admin-cabecera">
+        <div>
+          <h1>Tus productos</h1>
+          <p class="nota" id="resumen-productos"></p>
+        </div>
+        <button class="btn btn--primario" id="btn-nuevo"><span data-icon="plus"></span> Agregar juguete</button>
+      </div>
+
+      <div class="aviso-demo-admin" id="aviso-ejemplos" hidden>
+        <p>Tu tienda todavía tiene <strong id="n-ejemplos">0</strong> productos de ejemplo.</p>
+        <button class="btn btn--gris" id="btn-borrar-ejemplos">Borrar los ejemplos</button>
+      </div>
+
+      <div class="admin-herramientas">
+        <div class="buscador">
+          <span class="buscador__icono" data-icon="search"></span>
+          <label for="buscar-admin" class="sr">Buscar producto</label>
+          <input id="buscar-admin" type="search" placeholder="Buscar producto">
+        </div>
+      </div>
+
+      <ul class="lista-admin" id="lista-admin"></ul>
+
+      <p class="nota pie-admin">Los cambios aparecen en la tienda unos minutos después de guardarlos (si no los ves, recarga la tienda). <button class="btn btn--texto" id="btn-desconectar">Desconectar este dispositivo</button></p>
+    </section>
+
+    <p id="cargando" class="cargando">Cargando…</p>
+  </main>
+
+  <!-- FORMULARIO DE PRODUCTO -->
+  <dialog id="dlg-producto" class="dialogo dialogo--ancho" aria-labelledby="titulo-form">
+    <div class="dialogo__cabecera">
+      <h2 id="titulo-form">Agregar juguete</h2>
+      <button class="btn-icono" data-cerrar aria-label="Cerrar"><span data-icon="x"></span></button>
+    </div>
+    <form id="form-producto" class="form-producto" novalidate>
+      <div class="foto-subir">
+        <label class="foto-subir__zona" for="p-foto" id="zona-foto">
+          <span class="foto-subir__vacio" id="foto-vacia"><span data-icon="camera"></span><strong>Subir foto</strong><span>Toca para elegir o tomar una foto</span></span>
+          <img id="foto-preview" alt="Vista previa de la foto" hidden>
+        </label>
+        <input id="p-foto" type="file" accept="image/*" class="sr">
+        <button type="button" class="btn btn--texto" id="btn-quitar-foto" hidden>Quitar foto</button>
+      </div>
+
+      <div class="campos">
+        <div class="campo campo--ancho">
+          <label for="p-nombre">Nombre del juguete *</label>
+          <input id="p-nombre" maxlength="80" required>
+        </div>
+        <div class="campo campo--ancho">
+          <label for="p-descripcion">Descripción corta</label>
+          <textarea id="p-descripcion" rows="2" maxlength="240" placeholder="Ej.: Con luces y sonido. Funciona con pilas AA."></textarea>
+        </div>
+        <div class="campo">
+          <label for="p-precio">Precio (COP) *</label>
+          <input id="p-precio" inputmode="numeric" placeholder="45000" required>
+        </div>
+        <div class="campo">
+          <label for="p-promo">Precio en promoción</label>
+          <input id="p-promo" inputmode="numeric" placeholder="Vacío si no tiene">
+        </div>
+        <div class="campo">
+          <label for="p-categoria">Categoría *</label>
+          <select id="p-categoria" class="select-admin"></select>
+        </div>
+        <div class="campo">
+          <label for="p-stock">Unidades disponibles</label>
+          <input id="p-stock" inputmode="numeric" placeholder="Vacío si no llevas inventario">
+        </div>
+      </div>
+      <div class="interruptores">
+        <label class="check"><input type="checkbox" id="p-activo" checked> <span>Mostrar en la tienda</span></label>
+        <label class="check"><input type="checkbox" id="p-destacado"> <span>Destacado (aparece primero)</span></label>
+      </div>
+      <p class="error" id="error-producto" role="alert"></p>
+      <div class="form-producto__botones">
+        <button type="button" class="btn btn--gris" data-cerrar>Cancelar</button>
+        <button type="submit" class="btn btn--primario" id="btn-guardar">Guardar y publicar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/config.js?v=10"></script>
+  <script src="js/pedido.js?v=10"></script>
+  <script src="js/admin.js?v=10"></script>
+</body>
+</html>

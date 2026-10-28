@@ -38,7 +38,27 @@ img/productos/      → aquí van las fotos de tus juguetes
 
 Esa es la dirección que compartes con tus clientes. Funciona en celulares y computadores.
 
-## Cambiar datos y productos desde GitHub
+## Subir productos desde el panel (recomendado)
+
+La tienda tiene un panel para agregar, editar y borrar productos con foto, desde el celular o el computador:
+
+**https://andresyairrenteriamurillo-maker.github.io/tienda-juguetes/admin.html**
+
+(También está el enlace «Administrar» al final de la tienda.)
+
+La primera vez el panel te pide una **llave de acceso de GitHub**. El mismo panel explica cómo crearla. En resumen:
+
+1. Abre https://github.com/settings/personal-access-tokens/new
+2. Nombre: «Panel tienda». Vencimiento: el que quieras.
+3. *Repository access* → **Only select repositories** → `tienda-juguetes`.
+4. *Permissions* → *Repository permissions* → **Contents: Read and write**.
+5. **Generate token**, copia la llave (`github_pat_...`) y pégala en el panel.
+
+La llave solo funciona para esta tienda y queda guardada únicamente en tu dispositivo. Nunca la compartas ni la escribas en ningún archivo. Si pierdes el celular, bórrala en GitHub (*Settings → Developer settings → Personal access tokens*) y crea otra.
+
+Cada vez que guardas, el panel sube la foto (reducida para que cargue rápido) a `img/productos/` y actualiza `js/productos.js`. La tienda se actualiza en unos minutos.
+
+## Cambiar datos a mano desde GitHub
 
 No necesitas programas. Desde la página de tu repositorio:
 

@@ -54,6 +54,14 @@ window.TIENDA_CONFIG = {
     nit: "NIT o cédula del responsable"
   },
 
+  // Dónde está guardada la tienda en GitHub (lo usa el panel admin.html
+  // para guardar los productos). No es una contraseña.
+  github: {
+    usuario: "andresyairrenteriamurillo-maker",
+    repositorio: "tienda-juguetes",
+    rama: "main"
+  },
+
   // Mientras sea true, se muestra el aviso de "tienda de demostración".
   // Cámbialo a false cuando cargues tus productos reales.
   modoDemo: true
