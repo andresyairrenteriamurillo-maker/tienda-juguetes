@@ -306,6 +306,9 @@ button { cursor: pointer; }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 1020px) {
+  .enlace-cabecera__texto, .btn-carrito__texto { display: none; }
+  .enlace-cabecera { width: 44px; height: 44px; border-radius: 50%; background: rgba(255, 255, 255, .16); justify-content: center; }
+  .encabezado__fila { gap: 14px; }
   .portada { grid-template-columns: 1fr; }
   .mosaico { grid-template-columns: repeat(4, 1fr); }
   .mosaico__item { min-height: 150px; }
