@@ -258,8 +258,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* ---------- Responsive ---------- */
 @media (max-width: 860px) {
   .hero__fila { grid-template-columns: 1fr; padding-block: 28px 36px; }
-  .bloques { grid-template-columns: repeat(6, 1fr); max-width: none; margin: 8px 0 0; gap: 8px; transform: rotate(-2deg); }
-  .bloque-toy { font-size: 1.6rem; border-radius: 12px; box-shadow: 3px 3px 0 var(--tinta); }
+  .bloques { grid-template-columns: repeat(6, 1fr); max-width: 460px; margin: 8px 0 0; gap: 8px; transform: rotate(-2deg); }
+  .bloque-toy { font-size: clamp(1.5rem, 5vw, 2.3rem); border-radius: 12px; box-shadow: 3px 3px 0 var(--tinta); }
   .t2, .t5 { transform: translateY(-6px); }
   .tienda__fila { grid-template-columns: 1fr; gap: 32px; }
 }
