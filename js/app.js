@@ -43,7 +43,10 @@
     bank: '<path d="M3 22h18M6 18v-7M10 18v-7M14 18v-7M18 18v-7M12 2l8 5H4z"/>',
     cash: '<rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>',
     check: '<path d="M20 6 9 17l-5-5"/>',
-    eye: '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>'
+    eye: '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+    grid: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>',
+    tag: '<path d="M12.6 2.6A2 2 0 0 0 11.2 2H4a2 2 0 0 0-2 2v7.2a2 2 0 0 0 .6 1.4l8.7 8.7a2.4 2.4 0 0 0 3.4 0l6.6-6.6a2.4 2.4 0 0 0 0-3.4Z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>',
+    share: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/>'
   };
   function icono(nombre) {
     return '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONOS[nombre] || "") + "</svg>";
@@ -109,42 +112,66 @@
     return '<div class="' + clase + '" ' + fondo + ' role="img" aria-label="Imagen provisional de ' + esc(p.nombre) + '"><span class="foto__emoji">' + cat.emoji + "</span></div>";
   }
 
+  function descuento(p) {
+    var f = P.precioFinal(p);
+    return f < p.precio ? Math.round((1 - f / p.precio) * 100) : 0;
+  }
+
+  // Cada juguete es una "publicación" en la cuadrícula
   function tarjeta(p) {
     var disponible = P.estaDisponible(p);
-    var promo = P.precioFinal(p) < p.precio;
-    return '<article class="producto' + (disponible ? "" : " producto--agotado") + '">' +
-      '<button class="producto__media" data-detalle="' + esc(p.id) + '" aria-label="Ver detalles de ' + esc(p.nombre) + '">' + imagenProducto(p, "foto") +
-        (p.demo ? '<span class="sello sello--demo">Ejemplo</span>' : "") +
-        (promo ? '<span class="sello sello--promo">Promo</span>' : "") +
-        (!disponible ? '<span class="sello sello--agotado">Agotado</span>' : "") +
-      "</button>" +
-      '<div class="producto__cuerpo">' +
-        '<h3 class="producto__nombre"><button class="link-detalle" data-detalle="' + esc(p.id) + '">' + esc(p.nombre) + "</button></h3>" +
-        bloquePrecio(p) +
-        '<button class="btn btn--agregar" data-agregar="' + esc(p.id) + '"' + (disponible ? "" : " disabled") + ' aria-label="Agregar ' + esc(p.nombre) + ' al carrito">' +
-          (disponible ? icono("plus") + " Agregar" : "Agotado") + "</button>" +
-      "</div></article>";
+    var dcto = descuento(p);
+    return '<button class="post' + (disponible ? "" : " post--agotado") + '" data-detalle="' + esc(p.id) + '" aria-label="' + esc(p.nombre) + ", " + P.formatearCOP(P.precioFinal(p)) + (disponible ? "" : ", agotado") + '">' +
+      imagenProducto(p, "foto") +
+      (dcto ? '<span class="post__dcto">-' + dcto + "%</span>" : "") +
+      (p.demo ? '<span class="post__demo">Ejemplo</span>' : "") +
+      (!disponible ? '<span class="post__agotado">Agotado</span>' : "") +
+      '<span class="post__precio">' + P.formatearCOP(P.precioFinal(p)) + "</span>" +
+      '<span class="post__hover"><strong>' + esc(p.nombre) + "</strong><span>Ver juguete</span></span>" +
+      "</button>";
   }
 
   function pintarLista(sel, lista, vacio) {
     $(sel).innerHTML = lista.length ? lista.map(tarjeta).join("") : '<p class="vacio">' + esc(vacio || "No hay productos para mostrar.") + "</p>";
   }
 
-  /* ---------- Catálogo ---------- */
+  /* ---------- Perfil, historias y pestañas ---------- */
   var categoriaActiva = "";
+  var pestanaActiva = "todos";
+
+  function pintarPerfil() {
+    var ofertas = productos.filter(function (p) { return descuento(p) > 0; }).length;
+    var cats = CATS.filter(function (c) { return productos.some(function (p) { return p.categoria === c.clave; }); }).length;
+    $("#cifras").innerHTML =
+      "<li><strong>" + productos.length + "</strong> juguetes</li>" +
+      "<li><strong>" + ofertas + "</strong> en oferta</li>" +
+      "<li><strong>" + cats + "</strong> categorías</li>";
+  }
 
   function pintarChips() {
-    var hayPromos = productos.some(function (p) { return P.precioFinal(p) < p.precio; });
-    var chips = [{ clave: "", nombre: "Todos", emoji: "✨" }];
-    if (hayPromos) chips.push({ clave: "__promo", nombre: "Promociones", emoji: "🏷️" });
+    var hayPromos = productos.some(function (p) { return descuento(p) > 0; });
+    var items = [{ clave: "", nombre: "Todos", emoji: "✨", color: "#15192B" }];
+    if (hayPromos) items.push({ clave: "__promo", nombre: "Ofertas", emoji: "🏷️", color: "#E5482D" });
     CATS.forEach(function (c) {
-      if (productos.some(function (p) { return p.categoria === c.clave; })) chips.push(c);
+      if (productos.some(function (p) { return p.categoria === c.clave; })) items.push(c);
     });
-    $("#chips").innerHTML = chips.map(function (c) {
-      var activo = c.clave === categoriaActiva;
-      return '<button class="chip' + (activo ? " chip--activo" : "") + '" data-categoria="' + esc(c.clave) + '" aria-pressed="' + activo + '">' +
-        '<span aria-hidden="true">' + c.emoji + "</span> " + esc(c.nombre) + "</button>";
+    $("#historias").innerHTML = items.map(function (c) {
+      var activo = pestanaActiva !== "tienda" && c.clave === categoriaActiva;
+      return '<button class="historia' + (activo ? " historia--activa" : "") + '" data-categoria="' + esc(c.clave) + '" aria-pressed="' + activo + '">' +
+        '<span class="historia__aro"><span class="historia__circulo" style="--c:' + esc(c.color) + '">' + c.emoji + "</span></span>" +
+        '<span class="historia__nombre">' + esc(c.nombre) + "</span></button>";
     }).join("");
+  }
+
+  function cambiarPestana(tab) {
+    pestanaActiva = tab;
+    if (tab === "ofertas") categoriaActiva = "__promo";
+    else if (tab === "todos" && categoriaActiva === "__promo") categoriaActiva = "";
+    $$(".pestana").forEach(function (b) { b.setAttribute("aria-selected", b.getAttribute("data-tab") === tab ? "true" : "false"); });
+    $("#catalogo").hidden = tab === "tienda";
+    $("#panel-tienda").hidden = tab !== "tienda";
+    pintarChips();
+    if (tab !== "tienda") aplicarFiltros();
   }
 
   function normalizar(s) {
@@ -156,7 +183,7 @@
     var orden = $("#orden").value;
 
     var lista = productos.filter(function (p) {
-      if (categoriaActiva === "__promo" && P.precioFinal(p) >= p.precio) return false;
+      if (categoriaActiva === "__promo" && descuento(p) === 0) return false;
       if (categoriaActiva && categoriaActiva !== "__promo" && p.categoria !== categoriaActiva) return false;
       if (q) {
         var cn = catPorClave[p.categoria] ? catPorClave[p.categoria].nombre : "";
@@ -166,7 +193,6 @@
     });
 
     lista.sort(function (a, b) {
-      // Los agotados siempre van al final
       var da = P.estaDisponible(a) ? 0 : 1, db = P.estaDisponible(b) ? 0 : 1;
       if (da !== db) return da - db;
       if (orden === "menor") return P.precioFinal(a) - P.precioFinal(b);
@@ -175,8 +201,15 @@
       return b.fechaCreacion.localeCompare(a.fechaCreacion);
     });
 
-    pintarLista("#lista-catalogo", lista, "No encontramos juguetes con esa búsqueda. Prueba otra palabra o elige «Todos».");
-    $("#resultado").textContent = lista.length + (lista.length === 1 ? " juguete" : " juguetes");
+    pintarLista("#lista-catalogo", lista, "No encontramos juguetes con esa búsqueda. Prueba otra palabra o toca «Todos».");
+    var filtro = q || categoriaActiva;
+    var texto = "";
+    if (filtro) {
+      var nombre = categoriaActiva === "__promo" ? "Ofertas" : (catPorClave[categoriaActiva] ? catPorClave[categoriaActiva].nombre : "");
+      texto = lista.length + (lista.length === 1 ? " juguete" : " juguetes") + (nombre ? " en " + nombre : "") + (q ? " para «" + $("#buscar").value.trim() + "»" : "");
+    }
+    $("#resultado").textContent = texto;
+    $("#resultado").hidden = !texto;
   }
 
   /* ---------- Carrito ---------- */
@@ -263,25 +296,64 @@
     }
   }
 
-  /* ---------- Detalle de producto ---------- */
+  /* ---------- Publicación (detalle de producto) ---------- */
+  function enlaceProducto(p) {
+    return location.href.split("#")[0] + "#p=" + encodeURIComponent(p.id);
+  }
+
   function abrirDetalle(id) {
     var p = porId[id];
     if (!p) return;
     var cat = catPorClave[p.categoria];
     var disponible = P.estaDisponible(p);
+    var dcto = descuento(p);
+    var final = P.precioFinal(p);
+    var pregunta = P.construirEnlaceWhatsApp(CFG.whatsapp, "Hola, " + CFG.nombre + ". Quiero preguntar por: " + p.nombre + " (Ref. " + p.id + ").");
     $("#detalle-contenido").innerHTML =
-      '<div class="dialogo__cabecera"><h2 id="detalle-titulo">' + esc(p.nombre) + '</h2><button class="btn-icono" data-cerrar aria-label="Cerrar">' + icono("x") + "</button></div>" +
-      '<div class="detalle">' +
-        '<div class="detalle__media">' + imagenProducto(p, "foto foto--grande") + (p.demo ? '<span class="sello sello--demo">Ejemplo</span>' : "") + "</div>" +
-        '<div class="detalle__info">' +
-          '<p class="producto__cat">' + esc(cat ? cat.nombre : "") + " · Ref. " + esc(p.id) + "</p>" +
-          "<p>" + esc(p.descripcion) + "</p>" +
-          (p.demo ? '<p class="nota">Este es un producto de demostración: no está a la venta.</p>' : "") +
-          bloquePrecio(p) + etiquetaDisponibilidad(p) +
-          '<p class="nota">Recogida en tienda. Disponibilidad sujeta a confirmación.</p>' +
-          '<button class="btn btn--primario btn--bloque" data-agregar="' + esc(p.id) + '"' + (disponible ? "" : " disabled") + ">" + icono("cart") + (disponible ? " Agregar al carrito" : " Agotado") + "</button>" +
-        "</div></div>";
+      '<div class="pub">' +
+        '<div class="pub__media">' + imagenProducto(p, "foto foto--grande") +
+          (dcto ? '<span class="post__dcto">-' + dcto + "%</span>" : "") +
+          (p.demo ? '<span class="post__demo">Ejemplo</span>' : "") +
+        "</div>" +
+        '<div class="pub__lado">' +
+          '<div class="pub__cabecera">' +
+            '<span class="pub__avatar" aria-hidden="true">🧸</span>' +
+            '<div><strong>' + esc(CFG.nombre) + "</strong><span>" + esc(cat ? cat.nombre : "") + "</span></div>" +
+            '<button class="btn-icono" data-cerrar aria-label="Cerrar">' + icono("x") + "</button>" +
+          "</div>" +
+          '<div class="pub__texto">' +
+            '<h2 id="detalle-titulo">' + esc(p.nombre) + "</h2>" +
+            '<p class="pub__precio">' + (dcto ? '<span class="precio__antes">' + P.formatearCOP(p.precio) + "</span> " : "") +
+              '<span class="precio__ahora' + (dcto ? " precio__ahora--promo" : "") + '">' + P.formatearCOP(final, true) + "</span></p>" +
+            etiquetaDisponibilidad(p) +
+            '<p class="pub__desc">' + esc(p.descripcion) + "</p>" +
+            (p.demo ? '<p class="nota">Producto de demostración: no está a la venta.</p>' : "") +
+            '<p class="nota">Ref. ' + esc(p.id) + " · Recogida en tienda · Disponibilidad sujeta a confirmación.</p>" +
+          "</div>" +
+          '<div class="pub__acciones">' +
+            '<button class="btn btn--primario btn--bloque" data-agregar="' + esc(p.id) + '"' + (disponible ? "" : " disabled") + ">" + icono("cart") + (disponible ? " Agregar al carrito" : " Agotado") + "</button>" +
+            '<div class="pub__secundarias">' +
+              '<a class="btn btn--gris" href="' + esc(pregunta) + '" target="_blank" rel="noopener">' + icono("chat") + " Preguntar</a>" +
+              '<button class="btn btn--gris" data-compartir="' + esc(p.id) + '">' + icono("share") + " Compartir</button>" +
+            "</div>" +
+          "</div>" +
+        "</div>" +
+      "</div>";
     abrir($("#dlg-detalle"));
+  }
+
+  function compartir(id) {
+    var p = porId[id];
+    if (!p) return;
+    var url = enlaceProducto(p);
+    var texto = p.nombre + " – " + P.formatearCOP(P.precioFinal(p), true) + " en " + CFG.nombre;
+    if (navigator.share) {
+      navigator.share({ title: p.nombre, text: texto, url: url }).catch(function () {});
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(function () { aviso("Enlace copiado. Pégalo donde quieras compartirlo."); }, function () { aviso(url); });
+    } else {
+      aviso(url);
+    }
   }
 
   /* ---------- Diálogos ---------- */
@@ -396,9 +468,14 @@
       else if (b.hasAttribute("data-menos")) cambiarCantidad(b.getAttribute("data-menos"), -1);
       else if (b.hasAttribute("data-quitar")) quitar(b.getAttribute("data-quitar"));
       else if (b.hasAttribute("data-cerrar")) cerrar(b.closest("dialog"));
+      else if (b.hasAttribute("data-compartir")) compartir(b.getAttribute("data-compartir"));
+      else if (b.hasAttribute("data-tab")) {
+        cambiarPestana(b.getAttribute("data-tab"));
+        if (b.classList.contains("btn")) $(".pestanas").scrollIntoView({ behavior: "smooth", block: "start" });
+      }
       else if (b.hasAttribute("data-categoria")) {
         categoriaActiva = b.getAttribute("data-categoria");
-        pintarChips(); aplicarFiltros();
+        cambiarPestana(categoriaActiva === "__promo" ? "ofertas" : "todos");
       }
     });
 
@@ -413,7 +490,15 @@
       if (window.confirm("¿Seguro que quieres vaciar el carrito?")) { vaciar(); aviso("Carrito vacío"); }
     });
 
-    $("#buscar").addEventListener("input", aplicarFiltros);
+    $("#btn-buscar").addEventListener("click", function () {
+      var zona = $("#zona-buscar");
+      zona.hidden = !zona.hidden;
+      this.setAttribute("aria-expanded", zona.hidden ? "false" : "true");
+      if (!zona.hidden) $("#buscar").focus();
+    });
+    $("#buscar").addEventListener("input", function () {
+      if (pestanaActiva === "tienda") cambiarPestana("todos"); else aplicarFiltros();
+    });
     $("#form-buscar").addEventListener("submit", function (e) { e.preventDefault(); aplicarFiltros(); $("#buscar").blur(); });
     $("#orden").addEventListener("change", aplicarFiltros);
 
@@ -439,8 +524,17 @@
   /* ---------- Inicio ---------- */
   aplicarConfig();
   pintarIconos(document);
+  pintarPerfil();
   pintarChips();
   aplicarFiltros();
   actualizarCarrito();
   eventos();
+
+  // Enlace directo a un juguete: ...#p=CODIGO (sirve para compartir en redes)
+  function abrirDesdeEnlace() {
+    var m = /#p=([^&]+)/.exec(location.hash);
+    if (m && porId[decodeURIComponent(m[1])]) abrirDetalle(decodeURIComponent(m[1]));
+  }
+  abrirDesdeEnlace();
+  window.addEventListener("hashchange", abrirDesdeEnlace);
 })();

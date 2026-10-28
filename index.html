@@ -13,105 +13,102 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/estilos.css?v=7">
+  <link rel="stylesheet" href="css/estilos.css?v=9">
 </head>
 <body>
   <div class="aviso-demo" id="aviso-demo" hidden>Tienda de demostración: los productos y precios son ejemplos.</div>
 
-  <header class="encabezado">
-    <div class="contenedor encabezado__fila">
-      <a href="#" class="logo" aria-label="Ir al inicio">
-        <span class="logo__icono" aria-hidden="true">🧸</span>
-        <span class="logo__nombre" data-config="nombre">Juguetería</span>
+  <header class="barra">
+    <div class="perfil-ancho barra__fila">
+      <a href="#" class="barra__marca" aria-label="Ir al inicio">
+        <span class="barra__logo" aria-hidden="true">🧸</span>
+        <span class="barra__nombre" data-config="nombre">Juguetería</span>
       </a>
-      <button class="btn-carrito" id="abrir-carrito" aria-label="Abrir carrito">
-        <span data-icon="cart"></span>
-        <span class="btn-carrito__texto">Carrito</span>
-        <span class="contador" id="contador-carrito" aria-live="polite">0</span>
-      </button>
+      <div class="barra__acciones">
+        <button class="icono-btn" id="btn-buscar" aria-label="Buscar juguetes" aria-expanded="false" aria-controls="zona-buscar"><span data-icon="search"></span></button>
+        <a class="icono-btn enlace-wa-consulta" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp"><span data-icon="chat"></span></a>
+        <button class="icono-btn" id="abrir-carrito" aria-label="Abrir carrito">
+          <span data-icon="cart"></span>
+          <span class="contador" id="contador-carrito" aria-live="polite">0</span>
+        </button>
+      </div>
+    </div>
+    <div class="perfil-ancho zona-buscar" id="zona-buscar" hidden>
+      <form class="buscador" id="form-buscar" role="search">
+        <label for="buscar" class="sr">Buscar juguetes</label>
+        <span class="buscador__icono" data-icon="search"></span>
+        <input id="buscar" type="search" placeholder="Buscar juguetes" autocomplete="off" maxlength="60">
+      </form>
+      <label class="sr" for="orden">Ordenar</label>
+      <select id="orden" class="orden">
+        <option value="recomendados">Recomendados</option>
+        <option value="menor">Menor precio</option>
+        <option value="mayor">Mayor precio</option>
+        <option value="nuevos">Más nuevos</option>
+      </select>
     </div>
   </header>
 
-  <main>
-    <section class="hero">
-      <div class="contenedor hero__fila">
-        <div class="hero__texto">
-          <h1>Juguetes para jugar, regalar y sorprender</h1>
-          <p>Escoge tus juguetes, envíanos el pedido por WhatsApp y recógelo en la tienda.</p>
-          <a href="#catalogo" class="btn btn--primario btn--grande">Ver juguetes</a>
+  <main class="perfil-ancho">
+    <section class="perfil" aria-label="Perfil de la tienda">
+      <div class="perfil__avatar" aria-hidden="true"><span>🧸</span></div>
+      <div class="perfil__info">
+        <h1 class="perfil__nombre" data-config="nombre">Juguetería</h1>
+        <ul class="perfil__cifras" id="cifras"></ul>
+        <div class="perfil__bio">
+          <p class="perfil__eslogan" data-config="eslogan"></p>
+          <p>🏪 Pide por aquí y recoge en la tienda</p>
+          <p>💵 Efectivo o transferencia</p>
+          <p>📍 <span data-config="direccion"></span>, <span data-config="ciudad"></span></p>
         </div>
-        <div class="bloques" aria-hidden="true">
-          <span class="bloque-toy t1">🚗</span>
-          <span class="bloque-toy t2">🧸</span>
-          <span class="bloque-toy t3">🎲</span>
-          <span class="bloque-toy t4">🤖</span>
-          <span class="bloque-toy t5">⚽</span>
-          <span class="bloque-toy t6">🎨</span>
+        <div class="perfil__botones">
+          <a class="btn btn--primario enlace-wa-consulta" target="_blank" rel="noopener"><span data-icon="chat"></span> <span class="solo-pc">Escribir por</span> WhatsApp</a>
+          <button class="btn btn--gris" data-tab="tienda">Horarios <span class="solo-pc">y dirección</span></button>
         </div>
       </div>
     </section>
 
-    <section id="catalogo" class="catalogo contenedor" aria-labelledby="titulo-catalogo">
-      <div class="catalogo__cabecera">
-        <h2 id="titulo-catalogo">Nuestros juguetes</h2>
-        <div class="herramientas">
-          <form class="buscador" id="form-buscar" role="search">
-            <label for="buscar" class="sr">Buscar juguetes</label>
-            <span class="buscador__icono" data-icon="search"></span>
-            <input id="buscar" type="search" placeholder="Buscar" autocomplete="off" maxlength="60">
-          </form>
-          <label class="sr" for="orden">Ordenar</label>
-          <select id="orden" class="orden">
-            <option value="recomendados">Recomendados</option>
-            <option value="menor">Menor precio</option>
-            <option value="mayor">Mayor precio</option>
-            <option value="nuevos">Más nuevos</option>
-          </select>
-        </div>
-      </div>
-      <div class="chips" id="chips" role="group" aria-label="Categorías"></div>
-      <p class="resultado sr" id="resultado" aria-live="polite"></p>
-      <div class="rejilla" id="lista-catalogo"></div>
+    <nav class="historias" id="historias" aria-label="Categorías"></nav>
+
+    <div class="pestanas" role="tablist" aria-label="Secciones">
+      <button class="pestana" role="tab" data-tab="todos" aria-selected="true"><span data-icon="grid"></span> Juguetes</button>
+      <button class="pestana" role="tab" data-tab="ofertas" aria-selected="false"><span data-icon="tag"></span> Ofertas</button>
+      <button class="pestana" role="tab" data-tab="tienda" aria-selected="false"><span data-icon="store"></span> Tienda</button>
+    </div>
+
+    <section id="catalogo" aria-label="Juguetes">
+      <p class="resultado" id="resultado" aria-live="polite"></p>
+      <div class="cuadricula" id="lista-catalogo"></div>
     </section>
 
-    <section id="tienda" class="tienda">
-      <div class="contenedor tienda__fila">
-        <div>
-          <h2>Así de fácil pides</h2>
-          <ol class="pasos">
-            <li>Agrega los juguetes al carrito.</li>
-            <li>Escribe tu nombre y elige si pagas en efectivo o por transferencia.</li>
-            <li>Envía el pedido por WhatsApp.</li>
-            <li>Te confirmamos y lo recoges en la tienda.</li>
-          </ol>
-        </div>
-        <div class="tarjeta-tienda">
-          <h2>Ven por tu pedido</h2>
-          <p class="tarjeta-tienda__dir"><span data-icon="pin"></span><span><span data-config="direccion"></span>, <span data-config="ciudad"></span></span></p>
-          <ul class="horarios" id="horarios"></ul>
-          <a id="enlace-mapa" class="enlace" target="_blank" rel="noopener" hidden>Ver en el mapa</a>
-          <p class="nota">Solo recogida en tienda. No hacemos domicilios.</p>
-        </div>
+    <section id="panel-tienda" class="panel-tienda" hidden>
+      <div class="tarjeta">
+        <h2>Así de fácil pides</h2>
+        <ol class="pasos">
+          <li>Toca un juguete y agrégalo al carrito.</li>
+          <li>Escribe tu nombre y elige si pagas en efectivo o por transferencia.</li>
+          <li>Envía el pedido por WhatsApp.</li>
+          <li>Te confirmamos y lo recoges en la tienda.</li>
+        </ol>
+      </div>
+      <div class="tarjeta">
+        <h2>Ven por tu pedido</h2>
+        <p class="tarjeta__dir"><span data-icon="pin"></span><span><span data-config="direccion"></span>, <span data-config="ciudad"></span></span></p>
+        <ul class="horarios" id="horarios"></ul>
+        <a id="enlace-mapa" class="enlace" target="_blank" rel="noopener" hidden>Ver en el mapa</a>
+        <p class="nota">Solo recogida en tienda. No hacemos domicilios.</p>
       </div>
     </section>
   </main>
 
-  <footer class="pie">
-    <div class="contenedor pie__fila">
-      <p class="pie__nombre" data-config="nombre"></p>
-      <p>WhatsApp <a class="enlace-wa-texto" target="_blank" rel="noopener"><span data-config="telefonoVisible"></span></a></p>
-      <p><a id="enlace-correo"><span data-config="correo"></span></a></p>
-      <p><a href="privacidad.html">Política de datos personales</a></p>
-      <p>© <span id="anio"></span></p>
-    </div>
+  <footer class="pie perfil-ancho">
+    <p><a class="enlace-wa-texto" target="_blank" rel="noopener">WhatsApp <span data-config="telefonoVisible"></span></a> · <a id="enlace-correo"><span data-config="correo"></span></a> · <a href="privacidad.html">Política de datos</a></p>
+    <p>© <span id="anio"></span> <span data-config="nombre"></span> · Precios en pesos colombianos</p>
   </footer>
 
-  <a class="wa-flotante enlace-wa-consulta" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">
-    <span data-icon="chat"></span>
-  </a>
 
   <!-- DETALLE -->
-  <dialog id="dlg-detalle" class="dialogo" aria-labelledby="detalle-titulo">
+  <dialog id="dlg-detalle" class="dialogo dialogo--post" aria-labelledby="detalle-titulo">
     <div id="detalle-contenido"></div>
   </dialog>
 
@@ -242,9 +239,9 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="js/config.js?v=7"></script>
-  <script src="js/productos.js?v=7"></script>
-  <script src="js/pedido.js?v=7"></script>
-  <script src="js/app.js?v=7"></script>
+  <script src="js/config.js?v=9"></script>
+  <script src="js/productos.js?v=9"></script>
+  <script src="js/pedido.js?v=9"></script>
+  <script src="js/app.js?v=9"></script>
 </body>
 </html>
