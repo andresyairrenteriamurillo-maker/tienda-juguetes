@@ -110,23 +110,19 @@
   }
 
   function tarjeta(p) {
-    var cat = catPorClave[p.categoria];
     var disponible = P.estaDisponible(p);
+    var promo = P.precioFinal(p) < p.precio;
     return '<article class="producto' + (disponible ? "" : " producto--agotado") + '">' +
-      '<div class="producto__media">' + imagenProducto(p, "foto") +
-        (p.demo ? '<span class="sello-demo">EJEMPLO</span>' : "") +
-        (P.precioFinal(p) < p.precio ? '<span class="sello-promo">Promo</span>' : "") +
-      "</div>" +
+      '<button class="producto__media" data-detalle="' + esc(p.id) + '" aria-label="Ver detalles de ' + esc(p.nombre) + '">' + imagenProducto(p, "foto") +
+        (p.demo ? '<span class="sello sello--demo">Ejemplo</span>' : "") +
+        (promo ? '<span class="sello sello--promo">Promo</span>' : "") +
+        (!disponible ? '<span class="sello sello--agotado">Agotado</span>' : "") +
+      "</button>" +
       '<div class="producto__cuerpo">' +
-        '<p class="producto__cat">' + esc(cat ? cat.nombre : "") + "</p>" +
-        '<h3 class="producto__nombre">' + esc(p.nombre) + "</h3>" +
-        '<p class="producto__desc">' + esc(p.descripcion) + "</p>" +
-        bloquePrecio(p) + etiquetaDisponibilidad(p) +
-        '<div class="producto__acciones">' +
-          '<button class="btn btn--primario btn--agregar" data-agregar="' + esc(p.id) + '"' + (disponible ? "" : " disabled") + ">" +
-            icono("cart") + (disponible ? " Agregar al carrito" : " Agotado") + "</button>" +
-          '<button class="btn btn--claro" data-detalle="' + esc(p.id) + '">' + icono("eye") + " Ver detalles</button>" +
-        "</div>" +
+        '<h3 class="producto__nombre"><button class="link-detalle" data-detalle="' + esc(p.id) + '">' + esc(p.nombre) + "</button></h3>" +
+        bloquePrecio(p) +
+        '<button class="btn btn--agregar" data-agregar="' + esc(p.id) + '"' + (disponible ? "" : " disabled") + ' aria-label="Agregar ' + esc(p.nombre) + ' al carrito">' +
+          (disponible ? icono("plus") + " Agregar" : "Agotado") + "</button>" +
       "</div></article>";
   }
 
@@ -134,69 +130,53 @@
     $(sel).innerHTML = lista.length ? lista.map(tarjeta).join("") : '<p class="vacio">' + esc(vacio || "No hay productos para mostrar.") + "</p>";
   }
 
-  /* ---------- Secciones de inicio ---------- */
-  function pintarCategorias() {
-    $("#lista-categorias").innerHTML = CATS.map(function (c) {
-      var n = productos.filter(function (p) { return p.categoria === c.clave; }).length;
-      return '<button class="categoria" style="--c:' + esc(c.color) + '" data-categoria="' + esc(c.clave) + '">' +
-        '<span class="categoria__emoji" aria-hidden="true">' + c.emoji + "</span>" +
-        '<span class="categoria__nombre">' + esc(c.nombre) + "</span>" +
-        '<span class="categoria__n">' + n + (n === 1 ? " producto" : " productos") + "</span></button>";
-    }).join("") +
-      '<button class="categoria" style="--c:#E11D48" data-categoria="__promo"><span class="categoria__emoji" aria-hidden="true">🏷️</span><span class="categoria__nombre">Promociones</span><span class="categoria__n">Precios especiales</span></button>';
+  /* ---------- Catálogo ---------- */
+  var categoriaActiva = "";
 
-    $("#f-categoria").innerHTML = '<option value="">Todas</option>' + CATS.map(function (c) {
-      return '<option value="' + esc(c.clave) + '">' + esc(c.nombre) + "</option>";
+  function pintarChips() {
+    var hayPromos = productos.some(function (p) { return P.precioFinal(p) < p.precio; });
+    var chips = [{ clave: "", nombre: "Todos", emoji: "✨" }];
+    if (hayPromos) chips.push({ clave: "__promo", nombre: "Promociones", emoji: "🏷️" });
+    CATS.forEach(function (c) {
+      if (productos.some(function (p) { return p.categoria === c.clave; })) chips.push(c);
+    });
+    $("#chips").innerHTML = chips.map(function (c) {
+      var activo = c.clave === categoriaActiva;
+      return '<button class="chip' + (activo ? " chip--activo" : "") + '" data-categoria="' + esc(c.clave) + '" aria-pressed="' + activo + '">' +
+        '<span aria-hidden="true">' + c.emoji + "</span> " + esc(c.nombre) + "</button>";
     }).join("");
   }
 
-  function pintarInicio() {
-    pintarLista("#lista-destacados", productos.filter(function (p) { return p.destacado; }).slice(0, 8));
-    pintarLista("#lista-promos", productos.filter(function (p) { return P.precioFinal(p) < p.precio; }), "No hay promociones en este momento.");
-    var nuevos = productos.slice().sort(function (a, b) { return b.fechaCreacion.localeCompare(a.fechaCreacion); }).slice(0, 4);
-    pintarLista("#lista-novedades", nuevos);
-  }
-
-  /* ---------- Catálogo con filtros ---------- */
   function normalizar(s) {
-    return String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+    return String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   }
 
   function aplicarFiltros() {
     var q = normalizar($("#buscar").value.trim());
-    var cat = $("#f-categoria").value;
-    var min = parseInt($("#f-min").value, 10);
-    var max = parseInt($("#f-max").value, 10);
-    var soloDisp = $("#f-disponibles").checked;
-    var soloPromo = $("#f-promo").checked;
-    var orden = $("#f-orden").value;
+    var orden = $("#orden").value;
 
     var lista = productos.filter(function (p) {
-      var precio = P.precioFinal(p);
+      if (categoriaActiva === "__promo" && P.precioFinal(p) >= p.precio) return false;
+      if (categoriaActiva && categoriaActiva !== "__promo" && p.categoria !== categoriaActiva) return false;
       if (q) {
         var cn = catPorClave[p.categoria] ? catPorClave[p.categoria].nombre : "";
         if (normalizar(p.nombre + " " + p.descripcion + " " + cn).indexOf(q) === -1) return false;
       }
-      if (cat && p.categoria !== cat) return false;
-      if (!isNaN(min) && precio < min) return false;
-      if (!isNaN(max) && precio > max) return false;
-      if (soloDisp && !P.estaDisponible(p)) return false;
-      if (soloPromo && precio >= p.precio) return false;
       return true;
     });
 
     lista.sort(function (a, b) {
+      // Los agotados siempre van al final
+      var da = P.estaDisponible(a) ? 0 : 1, db = P.estaDisponible(b) ? 0 : 1;
+      if (da !== db) return da - db;
       if (orden === "menor") return P.precioFinal(a) - P.precioFinal(b);
       if (orden === "mayor") return P.precioFinal(b) - P.precioFinal(a);
+      if (orden === "recomendados" && a.destacado !== b.destacado) return a.destacado ? -1 : 1;
       return b.fechaCreacion.localeCompare(a.fechaCreacion);
     });
 
-    pintarLista("#lista-catalogo", lista, "No encontramos juguetes con esos filtros. Prueba con otra búsqueda.");
-    $("#resultado").textContent = lista.length + (lista.length === 1 ? " juguete encontrado" : " juguetes encontrados");
-  }
-
-  function irAlCatalogo() {
-    $("#catalogo").scrollIntoView({ behavior: "smooth", block: "start" });
+    pintarLista("#lista-catalogo", lista, "No encontramos juguetes con esa búsqueda. Prueba otra palabra o elige «Todos».");
+    $("#resultado").textContent = lista.length + (lista.length === 1 ? " juguete" : " juguetes");
   }
 
   /* ---------- Carrito ---------- */
@@ -292,7 +272,7 @@
     $("#detalle-contenido").innerHTML =
       '<div class="dialogo__cabecera"><h2 id="detalle-titulo">' + esc(p.nombre) + '</h2><button class="btn-icono" data-cerrar aria-label="Cerrar">' + icono("x") + "</button></div>" +
       '<div class="detalle">' +
-        '<div class="detalle__media">' + imagenProducto(p, "foto foto--grande") + (p.demo ? '<span class="sello-demo">EJEMPLO</span>' : "") + "</div>" +
+        '<div class="detalle__media">' + imagenProducto(p, "foto foto--grande") + (p.demo ? '<span class="sello sello--demo">Ejemplo</span>' : "") + "</div>" +
         '<div class="detalle__info">' +
           '<p class="producto__cat">' + esc(cat ? cat.nombre : "") + " · Ref. " + esc(p.id) + "</p>" +
           "<p>" + esc(p.descripcion) + "</p>" +
@@ -417,11 +397,8 @@
       else if (b.hasAttribute("data-quitar")) quitar(b.getAttribute("data-quitar"));
       else if (b.hasAttribute("data-cerrar")) cerrar(b.closest("dialog"));
       else if (b.hasAttribute("data-categoria")) {
-        var c = b.getAttribute("data-categoria");
-        $("#form-filtros").reset();
-        if (c === "__promo") $("#f-promo").checked = true; else $("#f-categoria").value = c;
-        $("#buscar").value = "";
-        aplicarFiltros(); irAlCatalogo();
+        categoriaActiva = b.getAttribute("data-categoria");
+        pintarChips(); aplicarFiltros();
       }
     });
 
@@ -437,17 +414,8 @@
     });
 
     $("#buscar").addEventListener("input", aplicarFiltros);
-    $("#form-buscar").addEventListener("submit", function (e) { e.preventDefault(); aplicarFiltros(); irAlCatalogo(); });
-    $("#form-filtros").addEventListener("input", aplicarFiltros);
-    $("#form-filtros").addEventListener("change", aplicarFiltros);
-    $("#form-filtros").addEventListener("reset", function () { setTimeout(aplicarFiltros, 0); });
-
-    var menu = $("#menu");
-    $("#btn-menu").addEventListener("click", function () {
-      var abierto = menu.classList.toggle("menu--abierto");
-      this.setAttribute("aria-expanded", abierto ? "true" : "false");
-    });
-    $$("#menu a").forEach(function (a) { a.addEventListener("click", function () { menu.classList.remove("menu--abierto"); $("#btn-menu").setAttribute("aria-expanded", "false"); }); });
+    $("#form-buscar").addEventListener("submit", function (e) { e.preventDefault(); aplicarFiltros(); $("#buscar").blur(); });
+    $("#orden").addEventListener("change", aplicarFiltros);
 
     var form = $("#form-pedido");
     form.addEventListener("submit", enviarPedido);
@@ -464,9 +432,6 @@
       aviso("¡Gracias! Tu pedido está pendiente de confirmación de la tienda por WhatsApp.");
     });
 
-    // En pantallas pequeñas los filtros empiezan cerrados
-    if (window.matchMedia("(max-width: 860px)").matches) $("#filtros").open = false;
-
     // Si el carrito cambia en otra pestaña
     window.addEventListener("storage", function (e) { if (e.key === CLAVE_CARRITO) { carrito = cargarCarrito(); actualizarCarrito(); } });
   }
@@ -474,8 +439,7 @@
   /* ---------- Inicio ---------- */
   aplicarConfig();
   pintarIconos(document);
-  pintarCategorias();
-  pintarInicio();
+  pintarChips();
   aplicarFiltros();
   actualizarCarrito();
   eventos();
