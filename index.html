@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="es-CO">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Juguetería | Catálogo de juguetes con pedidos por WhatsApp</title>
+  <meta name="description" content="Catálogo de juguetes con precios en pesos colombianos. Arma tu pedido, envíalo por WhatsApp y recógelo en la tienda.">
+  <meta name="theme-color" content="#6C3BD1">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Juguetería | Catálogo de juguetes">
+  <meta property="og:description" content="Arma tu pedido de juguetes y envíalo por WhatsApp. Recogida en tienda.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧸</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <a class="saltar" href="#catalogo">Saltar al catálogo</a>
+
+  <div class="aviso-demo" id="aviso-demo" hidden>
+    Tienda de demostración: los productos y precios son ejemplos, no están a la venta.
+  </div>
+
+  <header class="encabezado">
+    <div class="contenedor encabezado__fila">
+      <a href="#inicio" class="logo" aria-label="Ir al inicio">
+        <span class="logo__icono" aria-hidden="true">🧸</span>
+        <span>
+          <span class="logo__nombre" data-config="nombre">Juguetería</span>
+          <span class="logo__eslogan" data-config="eslogan"></span>
+        </span>
+      </a>
+
+      <form class="buscador" id="form-buscar" role="search">
+        <label for="buscar" class="sr">Buscar juguetes</label>
+        <span class="buscador__icono" data-icon="search"></span>
+        <input id="buscar" type="search" placeholder="Buscar juguetes…" autocomplete="off" maxlength="60">
+      </form>
+
+      <button class="btn-carrito" id="abrir-carrito" aria-label="Abrir carrito">
+        <span data-icon="cart"></span>
+        <span class="btn-carrito__texto">Carrito</span>
+        <span class="contador" id="contador-carrito" aria-live="polite">0</span>
+      </button>
+
+      <button class="btn-menu" id="btn-menu" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu">
+        <span data-icon="menu"></span>
+      </button>
+    </div>
+    <nav class="menu contenedor" id="menu" aria-label="Menú principal">
+      <a href="#inicio">Inicio</a>
+      <a href="#categorias">Categorías</a>
+      <a href="#destacados">Destacados</a>
+      <a href="#catalogo">Catálogo</a>
+      <a href="#promociones">Promociones</a>
+      <a href="#tienda">La tienda</a>
+    </nav>
+  </header>
+
+  <main id="inicio">
+    <!-- BANNER PRINCIPAL -->
+    <section class="hero">
+      <div class="contenedor hero__fila">
+        <div class="hero__texto">
+          <p class="etiqueta-hero">Recoge en tienda · Paga en efectivo o transferencia</p>
+          <h1>¡Encuentra el juguete perfecto y pídelo por WhatsApp!</h1>
+          <p>Elige tus juguetes, arma tu carrito y envíanos el pedido. Te confirmamos la disponibilidad y lo recoges en nuestra tienda.</p>
+          <div class="hero__botones">
+            <a href="#catalogo" class="btn btn--primario">Ver catálogo</a>
+            <a href="#promociones" class="btn btn--claro">Ver promociones</a>
+          </div>
+        </div>
+        <div class="hero__arte" aria-hidden="true">
+          <span class="burbuja b1">🚗</span><span class="burbuja b2">🧸</span>
+          <span class="burbuja b3">🎲</span><span class="burbuja b4">🤖</span>
+          <span class="burbuja b5">🧱</span><span class="burbuja b6">⚽</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMO FUNCIONA -->
+    <section class="contenedor pasos" aria-label="Cómo comprar">
+      <div class="paso"><b>1</b><span>Agrega juguetes al carrito</span></div>
+      <div class="paso"><b>2</b><span>Escribe tus datos y elige cómo pagar</span></div>
+      <div class="paso"><b>3</b><span>Envía el pedido por WhatsApp</span></div>
+      <div class="paso"><b>4</b><span>Te confirmamos y recoges en tienda</span></div>
+    </section>
+
+    <!-- CATEGORIAS -->
+    <section id="categorias" class="seccion contenedor">
+      <h2 class="titulo-seccion">Categorías</h2>
+      <div class="categorias" id="lista-categorias"></div>
+    </section>
+
+    <!-- DESTACADOS -->
+    <section id="destacados" class="seccion contenedor">
+      <h2 class="titulo-seccion">Productos destacados</h2>
+      <div class="rejilla" id="lista-destacados"></div>
+    </section>
+
+    <!-- PROMOCIONES Y NOVEDADES -->
+    <section id="promociones" class="seccion seccion--color">
+      <div class="contenedor">
+        <h2 class="titulo-seccion">Promociones</h2>
+        <div class="rejilla" id="lista-promos"></div>
+        <h2 class="titulo-seccion titulo-seccion--espacio">Novedades</h2>
+        <div class="rejilla" id="lista-novedades"></div>
+      </div>
+    </section>
+
+    <!-- CATALOGO -->
+    <section id="catalogo" class="seccion contenedor">
+      <h2 class="titulo-seccion">Catálogo general</h2>
+      <div class="catalogo">
+        <details class="filtros" id="filtros" open>
+          <summary><span data-icon="filter"></span> Filtros</summary>
+          <form id="form-filtros" class="filtros__form">
+            <label>Categoría
+              <select id="f-categoria"><option value="">Todas</option></select>
+            </label>
+            <fieldset class="rango">
+              <legend>Precio (COP)</legend>
+              <label class="sr" for="f-min">Precio mínimo</label>
+              <input id="f-min" type="number" inputmode="numeric" min="0" step="1000" placeholder="Mínimo">
+              <span aria-hidden="true">–</span>
+              <label class="sr" for="f-max">Precio máximo</label>
+              <input id="f-max" type="number" inputmode="numeric" min="0" step="1000" placeholder="Máximo">
+            </fieldset>
+            <label class="check"><input id="f-disponibles" type="checkbox"> Solo disponibles</label>
+            <label class="check"><input id="f-promo" type="checkbox"> Solo promociones</label>
+            <label>Ordenar por
+              <select id="f-orden">
+                <option value="recientes">Más recientes</option>
+                <option value="menor">Precio: menor a mayor</option>
+                <option value="mayor">Precio: mayor a menor</option>
+              </select>
+            </label>
+            <button type="reset" class="btn btn--texto">Limpiar filtros</button>
+          </form>
+        </details>
+        <div>
+          <p class="resultado" id="resultado" aria-live="polite"></p>
+          <div class="rejilla" id="lista-catalogo"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INFO TIENDA -->
+    <section id="tienda" class="seccion seccion--color">
+      <div class="contenedor">
+        <h2 class="titulo-seccion">Visítanos</h2>
+        <div class="info-tienda">
+          <div class="tarjeta-info">
+            <span class="tarjeta-info__icono" data-icon="pin"></span>
+            <h3>Dirección</h3>
+            <p><span data-config="direccion"></span><br><span data-config="ciudad"></span></p>
+            <a id="enlace-mapa" class="enlace" target="_blank" rel="noopener" hidden>Ver en el mapa</a>
+          </div>
+          <div class="tarjeta-info">
+            <span class="tarjeta-info__icono" data-icon="clock"></span>
+            <h3>Horarios</h3>
+            <ul class="horarios" id="horarios"></ul>
+          </div>
+          <div class="tarjeta-info">
+            <span class="tarjeta-info__icono" data-icon="store"></span>
+            <h3>Solo recogida en tienda</h3>
+            <p>Todos los pedidos se recogen personalmente en la tienda. No hacemos envíos a domicilio.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <div class="contenedor pie__fila">
+      <div>
+        <p class="pie__nombre" data-config="nombre"></p>
+        <p><span data-config="direccion"></span>, <span data-config="ciudad"></span></p>
+      </div>
+      <div>
+        <p>WhatsApp: <a class="enlace-wa-texto" target="_blank" rel="noopener"><span data-config="telefonoVisible"></span></a></p>
+        <p>Correo: <a id="enlace-correo"><span data-config="correo"></span></a></p>
+      </div>
+      <div>
+        <p><a href="privacidad.html">Política de tratamiento de datos personales</a></p>
+        <p class="pie__nota">Precios en pesos colombianos (COP). Disponibilidad sujeta a confirmación de la tienda.</p>
+      </div>
+    </div>
+    <p class="pie__copy">© <span id="anio"></span> <span data-config="nombre"></span></p>
+  </footer>
+
+  <!-- BOTON FLOTANTE WHATSAPP -->
+  <a class="wa-flotante enlace-wa-consulta" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">
+    <span data-icon="chat"></span><span class="wa-flotante__texto">¿Preguntas?</span>
+  </a>
+
+  <!-- DETALLE DE PRODUCTO -->
+  <dialog id="dlg-detalle" class="dialogo" aria-labelledby="detalle-titulo">
+    <div id="detalle-contenido"></div>
+  </dialog>
+
+  <!-- CARRITO -->
+  <dialog id="dlg-carrito" class="dialogo dialogo--lateral" aria-labelledby="carrito-titulo">
+    <div class="carrito">
+      <div class="dialogo__cabecera">
+        <h2 id="carrito-titulo">Tu carrito</h2>
+        <button class="btn-icono" data-cerrar aria-label="Cerrar carrito"><span data-icon="x"></span></button>
+      </div>
+      <p class="estado-mini"><span class="punto"></span> Carrito en preparación</p>
+      <div class="carrito__lista" id="carrito-lista"></div>
+      <div class="carrito__pie" id="carrito-pie">
+        <div class="total-fila"><span>Total</span><strong id="carrito-total">$0</strong></div>
+        <p class="nota">La disponibilidad y el precio final quedan sujetos a la confirmación de la tienda.</p>
+        <button class="btn btn--primario btn--bloque" id="btn-finalizar">Finalizar pedido</button>
+        <div class="carrito__acciones">
+          <button class="btn btn--texto" data-cerrar>Seguir comprando</button>
+          <button class="btn btn--texto btn--peligro" id="btn-vaciar">Vaciar carrito</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- FINALIZAR PEDIDO -->
+  <dialog id="dlg-pedido" class="dialogo dialogo--ancho" aria-labelledby="pedido-titulo">
+    <div class="dialogo__cabecera">
+      <h2 id="pedido-titulo">Finalizar pedido</h2>
+      <button class="btn-icono" data-cerrar aria-label="Cerrar"><span data-icon="x"></span></button>
+    </div>
+
+    <ol class="estados" id="estados" aria-label="Estado del pedido">
+      <li data-estado="1">Carrito en preparación</li>
+      <li data-estado="2">Pedido preparado para enviar por WhatsApp</li>
+      <li data-estado="3">Pendiente de confirmación de la tienda</li>
+      <li data-estado="4">Confirmado por la tienda</li>
+    </ol>
+
+    <form id="form-pedido" novalidate>
+      <section class="bloque">
+        <h3>1. Tus datos</h3>
+        <p class="nota">No necesitas crear una cuenta ni contraseña.</p>
+        <div class="campos">
+          <div class="campo">
+            <label for="c-nombre">Nombre completo *</label>
+            <input id="c-nombre" name="nombre" autocomplete="name" maxlength="80" required>
+            <p class="error" id="e-nombre"></p>
+          </div>
+          <div class="campo">
+            <label for="c-celular">Celular o WhatsApp *</label>
+            <input id="c-celular" name="celular" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="300 123 4567" maxlength="16" required>
+            <p class="error" id="e-celular"></p>
+          </div>
+          <div class="campo" id="campo-documento" hidden>
+            <label for="c-documento">Documento de identidad (opcional)</label>
+            <input id="c-documento" name="documento" inputmode="numeric" maxlength="12">
+            <p class="error" id="e-documento"></p>
+          </div>
+          <div class="campo campo--ancho">
+            <label for="c-observaciones">Observaciones (opcional)</label>
+            <textarea id="c-observaciones" name="observaciones" rows="2" maxlength="300" placeholder="Ej.: es para regalo, prefiero recoger el sábado…"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <section class="bloque">
+        <h3>2. ¿Cómo deseas pagar?</h3>
+        <div class="pagos" role="radiogroup" aria-describedby="e-metodoPago">
+          <label class="pago">
+            <input type="radio" name="metodoPago" value="transferencia">
+            <span class="pago__tarjeta">
+              <span class="pago__icono" data-icon="bank"></span>
+              <strong>Transferencia bancaria</strong>
+              <span>Pagarás mediante transferencia bancaria. Los datos bancarios te los compartirá la tienda directamente por WhatsApp.</span>
+            </span>
+          </label>
+          <label class="pago">
+            <input type="radio" name="metodoPago" value="efectivo">
+            <span class="pago__tarjeta">
+              <span class="pago__icono" data-icon="cash"></span>
+              <strong>Efectivo</strong>
+              <span>Pagarás en efectivo al recoger tu pedido, personalmente en la tienda.</span>
+            </span>
+          </label>
+        </div>
+        <p class="error" id="e-metodoPago"></p>
+        <p class="nota">Nunca te pediremos claves, contraseñas bancarias ni códigos de seguridad.</p>
+      </section>
+
+      <section class="bloque">
+        <h3>3. Entrega</h3>
+        <div class="recogida">
+          <span class="recogida__icono" data-icon="store"></span>
+          <div>
+            <strong>Recoger personalmente en la tienda</strong>
+            <p><span data-config="direccion"></span>, <span data-config="ciudad"></span></p>
+            <ul class="horarios horarios--compacto" id="horarios-pedido"></ul>
+            <ul class="instrucciones" id="instrucciones"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="bloque">
+        <h3>4. Resumen del pedido</h3>
+        <div class="tabla-resumen" id="resumen"></div>
+      </section>
+
+      <label class="check check--consentimiento">
+        <input type="checkbox" name="aceptaDatos" id="c-acepta">
+        <span>Acepto la <a href="privacidad.html" target="_blank" rel="noopener">política de tratamiento de datos personales</a> y autorizo el uso de mis datos solo para gestionar este pedido.</span>
+      </label>
+      <p class="error" id="e-aceptaDatos"></p>
+
+      <p class="aviso">Tu pedido <strong>no queda confirmado ni pagado</strong> hasta que la tienda te responda por WhatsApp.</p>
+
+      <button type="submit" class="btn btn--wa btn--bloque"><span data-icon="chat"></span> Enviar pedido por WhatsApp</button>
+    </form>
+
+    <div id="post-envio" class="post-envio" hidden tabindex="-1">
+      <div class="post-envio__icono" aria-hidden="true">📲</div>
+      <h3>Completa el envío del mensaje en WhatsApp para que la tienda reciba tu pedido</h3>
+      <p>Abrimos WhatsApp con tu pedido escrito. Revisa el mensaje y pulsa <strong>Enviar</strong> dentro de WhatsApp.</p>
+      <p>Después, la tienda revisará la disponibilidad y te confirmará el pedido y los detalles de pago por ese mismo chat.</p>
+      <p class="nota">¿No se abrió WhatsApp? <a id="enlace-reintentar" target="_blank" rel="noopener" class="enlace">Ábrelo de nuevo aquí</a>.</p>
+      <div class="post-envio__acciones">
+        <button class="btn btn--primario" id="btn-ya-envie">Ya envié el mensaje</button>
+        <button class="btn btn--texto" id="btn-volver-form">Volver y corregir</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/productos.js"></script>
+  <script src="js/pedido.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
