@@ -22,7 +22,7 @@ window.CATEGORIAS = [
   {"clave":"peluches","nombre":"Peluches","emoji":"🧸","color":"#D97706"},
   {"clave":"bebes","nombre":"Juguetes para bebés","emoji":"🍼","color":"#06B6D4"},
   {"clave":"accion","nombre":"Figuras de acción","emoji":"🦸","color":"#EF4444"},
-  {"clave":"electronicos","nombre":"Juguetes electrónicos","emoji":"🤖","color":"#6366F1"},
+  {"clave":"electronicos","nombre":"MOCHILAS","emoji":"🤖","color":"#6366F1"},
   {"clave":"airelibre","nombre":"Aire libre y deportes","emoji":"⚽","color":"#22C55E"},
   {"clave":"manualidades","nombre":"Manualidades","emoji":"🎨","color":"#F43F5E"}
 ];
