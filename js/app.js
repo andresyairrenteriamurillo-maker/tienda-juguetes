@@ -156,6 +156,15 @@
       "<li><strong>" + cats + "</strong> categorías</li>";
   }
 
+  // Foto para la miniatura de una categoría: primero un destacado, luego el más reciente; disponibles antes que agotados
+  function fotoDe(lista) {
+    var conFoto = lista.filter(function (p) { return p.imagen; }).sort(function (a, b) {
+      return (P.estaDisponible(b) - P.estaDisponible(a)) || ((b.destacado ? 1 : 0) - (a.destacado ? 1 : 0)) ||
+        String(b.fechaCreacion).localeCompare(String(a.fechaCreacion));
+    });
+    return conFoto[0] ? conFoto[0].imagen : "";
+  }
+
   function pintarChips() {
     var hayPromos = productos.some(function (p) { return descuento(p) > 0; });
     var items = [{ clave: "", nombre: "Todos", emoji: "✨", color: "#15192B" }];
@@ -165,8 +174,14 @@
     });
     $("#historias").innerHTML = items.map(function (c) {
       var activo = pestanaActiva !== "tienda" && c.clave === categoriaActiva;
+      var foto = c.clave === "" ? "" : fotoDe(productos.filter(function (p) {
+        return c.clave === "__promo" ? descuento(p) > 0 : p.categoria === c.clave;
+      }));
       return '<button class="historia' + (activo ? " historia--activa" : "") + '" data-categoria="' + esc(c.clave) + '" aria-pressed="' + activo + '">' +
-        '<span class="historia__aro"><span class="historia__circulo" style="--c:' + esc(c.color) + '">' + c.emoji + "</span></span>" +
+        '<span class="historia__aro"><span class="historia__circulo" style="--c:' + esc(c.color) + '">' + c.emoji +
+          (foto ? '<img src="' + esc(foto) + '" alt="" loading="lazy" decoding="async" onerror="this.remove()">' : "") +
+          (foto ? '<span class="historia__mini" aria-hidden="true">' + c.emoji + "</span>" : "") +
+        "</span></span>" +
         '<span class="historia__nombre">' + esc(c.nombre) + "</span></button>";
     }).join("");
   }

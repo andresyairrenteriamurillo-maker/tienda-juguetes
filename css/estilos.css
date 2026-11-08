@@ -106,6 +106,10 @@ button { cursor: pointer; }
 .historia { flex: none; display: grid; justify-items: center; gap: 6px; width: 78px; border: 0; background: none; padding: 0; }
 .historia__aro { display: block; width: 72px; height: 72px; border-radius: 50%; padding: 3px; background: var(--linea); transition: background .2s; }
 .historia__circulo { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 50%; border: 3px solid var(--fondo); font-size: 1.8rem; background: color-mix(in srgb, var(--c) 14%, var(--fondo)); transition: transform .2s; }
+.historia__circulo { position: relative; overflow: visible; }
+.historia__circulo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; background: var(--superficie, #fff); }
+.historia__mini { position: absolute; right: -4px; bottom: -4px; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: .8rem; background: var(--fondo); box-shadow: 0 1px 4px rgba(0,0,0,.18); }
+.historia__circulo img:not([src]), .historia__circulo:not(:has(img)) .historia__mini { display: none; }
 .historia:hover .historia__circulo { transform: scale(1.05); }
 .historia--activa .historia__aro { background: var(--aro); }
 .historia__nombre { font-size: .74rem; font-weight: 500; line-height: 1.2; text-align: center; max-width: 100%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
