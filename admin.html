@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/estilos.css?v=14">
-  <link rel="stylesheet" href="css/admin.css?v=14">
+  <link rel="stylesheet" href="css/estilos.css?v=15">
+  <link rel="stylesheet" href="css/admin.css?v=15">
   <script>(function(){var t=null;try{t=localStorage.getItem("tema")}catch(e){}if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"oscuro":"claro";document.documentElement.setAttribute("data-tema",t)})();</script>
 </head>
 <body>
@@ -85,7 +85,10 @@
           <h1>Tus productos</h1>
           <p class="nota" id="resumen-productos"></p>
         </div>
-        <button class="btn btn--primario" id="btn-nuevo"><span data-icon="plus"></span> Agregar juguete</button>
+        <span class="admin-cabecera__botones">
+          <button class="btn btn--gris" id="btn-datos">⚙️ Datos de la tienda</button>
+          <button class="btn btn--primario" id="btn-nuevo"><span data-icon="plus"></span> Agregar juguete</button>
+        </span>
       </div>
 
       <div class="aviso-clave" id="aviso-clave" hidden>
@@ -176,10 +179,58 @@
     </form>
   </dialog>
 
+  <!-- DATOS DE LA TIENDA -->
+  <dialog id="dlg-datos" class="dialogo dialogo--ancho" aria-labelledby="titulo-datos">
+    <div class="dialogo__cabecera">
+      <h2 id="titulo-datos">Datos de la tienda</h2>
+      <button class="btn-icono" data-cerrar aria-label="Cerrar"><span data-icon="x"></span></button>
+    </div>
+    <form id="form-datos" class="form-producto" novalidate>
+      <h3 class="subtitulo-admin">Tienda</h3>
+      <div class="campos">
+        <div class="campo"><label for="d-nombre">Nombre de la tienda *</label><input id="d-nombre" maxlength="40" required></div>
+        <div class="campo"><label for="d-eslogan">Frase corta</label><input id="d-eslogan" maxlength="80"></div>
+      </div>
+
+      <h3 class="subtitulo-admin">Contacto</h3>
+      <div class="campos">
+        <div class="campo"><label for="d-whatsapp">WhatsApp de la tienda * <span class="nota">(aquí llegan los pedidos)</span></label><input id="d-whatsapp" inputmode="tel" placeholder="300 123 4567" maxlength="16"></div>
+        <div class="campo"><label for="d-correo">Correo</label><input id="d-correo" type="email" inputmode="email" maxlength="80"></div>
+        <div class="campo"><label for="d-direccion">Dirección *</label><input id="d-direccion" maxlength="100" placeholder="Calle 10 # 20-30, Barrio Centro"></div>
+        <div class="campo"><label for="d-ciudad">Ciudad *</label><input id="d-ciudad" maxlength="60" placeholder="Bogotá, Colombia"></div>
+        <div class="campo campo--ancho"><label for="d-mapa">Enlace de Google Maps (opcional)</label><input id="d-mapa" type="url" maxlength="300" placeholder="https://maps.app.goo.gl/..."></div>
+      </div>
+
+      <h3 class="subtitulo-admin">Horarios</h3>
+      <p class="nota">Una línea por horario: días, dos puntos y horas. Ej.: <code>Sábados: 9:00 a. m. – 5:00 p. m.</code></p>
+      <div class="campo campo--ancho"><label for="d-horarios" class="sr">Horarios</label><textarea id="d-horarios" rows="4"></textarea></div>
+
+      <h3 class="subtitulo-admin">Instrucciones para recoger</h3>
+      <p class="nota">Una instrucción por línea. El cliente las ve antes de enviar el pedido.</p>
+      <div class="campo campo--ancho"><label for="d-instrucciones" class="sr">Instrucciones</label><textarea id="d-instrucciones" rows="4"></textarea></div>
+
+      <h3 class="subtitulo-admin">Política de datos</h3>
+      <div class="campos">
+        <div class="campo"><label for="d-razon">Nombre o razón social del dueño</label><input id="d-razon" maxlength="100"></div>
+        <div class="campo"><label for="d-nit">NIT o cédula</label><input id="d-nit" maxlength="30"></div>
+      </div>
+
+      <div class="interruptores">
+        <label class="check"><input type="checkbox" id="d-documento"> <span>Pedir documento de identidad en el pedido (opcional para el cliente)</span></label>
+        <label class="check"><input type="checkbox" id="d-demo"> <span>Mostrar aviso «Tienda de demostración» (quítalo cuando la tienda sea real)</span></label>
+      </div>
+      <p class="error" id="error-datos" role="alert"></p>
+      <div class="form-producto__botones">
+        <button type="button" class="btn btn--gris" data-cerrar>Cancelar</button>
+        <button type="submit" class="btn btn--primario" id="btn-guardar-datos">Guardar y publicar</button>
+      </div>
+    </form>
+  </dialog>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="js/config.js?v=14"></script>
-  <script src="js/pedido.js?v=14"></script>
-  <script src="js/admin.js?v=14"></script>
+  <script src="js/config.js?v=15"></script>
+  <script src="js/pedido.js?v=15"></script>
+  <script src="js/admin.js?v=15"></script>
 </body>
 </html>

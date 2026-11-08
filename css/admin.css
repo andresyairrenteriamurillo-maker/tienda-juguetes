@@ -81,3 +81,10 @@
 .crear-clave .error { flex-basis: 100%; margin: 0; }
 .ayuda--otra { margin-top: 18px; }
 .ayuda--otra #bloque-llave h1 { font-size: 1.2rem; margin-top: 12px; }
+
+/* Datos de la tienda */
+.admin-cabecera__botones { display: flex; gap: 8px; flex-wrap: wrap; }
+.subtitulo-admin { font-size: 1rem; margin: 18px 0 8px; }
+.subtitulo-admin:first-child { margin-top: 0; }
+#form-datos .nota { margin: 0 0 8px; }
+#form-datos code { background: var(--gris); padding: 1px 6px; border-radius: 5px; }

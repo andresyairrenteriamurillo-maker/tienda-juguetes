@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/estilos.css?v=14">
+  <link rel="stylesheet" href="css/estilos.css?v=15">
   <script>
     // Aplica el modo noche antes de pintar la página (evita parpadeo)
     (function () {
@@ -259,8 +259,17 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="js/config.js?v=14"></script>
-  <script src="js/productos.js?v=14"></script>
+  <script src="js/config.js?v=15"></script>
+  <script>
+    // Solo en el dispositivo del administrador: muestra al instante los datos recién guardados
+    (function () {
+      try {
+        var r = JSON.parse(localStorage.getItem("config_reciente_v1") || "null");
+        if (r && Date.now() - r.t < 20 * 60 * 1000) window.TIENDA_CONFIG = r.config;
+      } catch (e) { /* se usan los datos normales */ }
+    })();
+  </script>
+  <script src="js/productos.js?v=15"></script>
   <script>
     // Solo en el dispositivo del administrador: muestra al instante lo que se acaba
     // de guardar en el panel, mientras GitHub Pages publica el cambio (unos minutos).
@@ -276,7 +285,7 @@
       } catch (e) { /* se usa el catálogo normal */ }
     })();
   </script>
-  <script src="js/pedido.js?v=14"></script>
-  <script src="js/app.js?v=14"></script>
+  <script src="js/pedido.js?v=15"></script>
+  <script src="js/app.js?v=15"></script>
 </body>
 </html>

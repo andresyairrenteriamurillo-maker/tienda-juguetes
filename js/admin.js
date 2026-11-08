@@ -469,6 +469,166 @@
     }).catch(function (e) { $("#error-producto").textContent = e.message; });
   }
 
+  /* ---------- Datos de la tienda (js/config.js) ---------- */
+  var ARCHIVO_CONFIG = "js/config.js";
+  var cfgActual = null, shaConfig = "";
+
+  function leerConfig() {
+    return gh("GET", ARCHIVO_CONFIG + "?ref=" + encodeURIComponent(RAMA)).then(function (d) {
+      shaConfig = d.sha;
+      var caja = {};
+      new Function("window", deBase64(d.content))(caja);
+      cfgActual = caja.TIENDA_CONFIG;
+      return cfgActual;
+    });
+  }
+
+  function js(v) { return JSON.stringify(v); }
+  function generarConfig(c) {
+    var h = c.horarios.map(function (x) { return "    { dias: " + js(x.dias) + ", horas: " + js(x.horas) + " }"; }).join(",\n");
+    var ins = c.instruccionesRecogida.map(function (x) { return "    " + js(x); }).join(",\n");
+    return [
+      "/* =========================================================",
+      "   CONFIGURACIÓN DE LA TIENDA",
+      "   ---------------------------------------------------------",
+      "   Lo más fácil es cambiar estos datos desde el panel:",
+      "   Administrar → Datos de la tienda. También puedes editar",
+      "   aquí lo que está entre comillas y guardar.",
+      "   ========================================================= */",
+      "",
+      "window.TIENDA_CONFIG = {",
+      "  // Nombre que aparece en el encabezado, el pie de página y el mensaje de WhatsApp",
+      "  nombre: " + js(c.nombre) + ",",
+      "",
+      "  // Frase corta debajo del nombre",
+      "  eslogan: " + js(c.eslogan) + ",",
+      "",
+      "  // WhatsApp en formato internacional: 57 + 10 dígitos, sin espacios ni \"+\"",
+      "  whatsapp: " + js(c.whatsapp) + ",",
+      "",
+      "  // Cómo se muestra el teléfono en la página",
+      "  telefonoVisible: " + js(c.telefonoVisible) + ",",
+      "",
+      "  // Correo de contacto (pie de página y política de datos)",
+      "  correo: " + js(c.correo) + ",",
+      "",
+      "  // Dirección donde los clientes recogen sus pedidos",
+      "  direccion: " + js(c.direccion) + ",",
+      "  ciudad: " + js(c.ciudad) + ",",
+      "",
+      "  // Enlace de Google Maps (opcional). \"\" si no tienes.",
+      "  mapaUrl: " + js(c.mapaUrl) + ",",
+      "",
+      "  // Horarios de atención y de recogida",
+      "  horarios: [",
+      h,
+      "  ],",
+      "",
+      "  // Instrucciones que verá el cliente antes de enviar el pedido",
+      "  instruccionesRecogida: [",
+      ins,
+      "  ],",
+      "",
+      "  // true = el formulario pide el documento de identidad (siempre opcional)",
+      "  pedirDocumento: " + js(!!c.pedirDocumento) + ",",
+      "",
+      "  // Datos del responsable del tratamiento de datos (política de privacidad)",
+      "  responsable: {",
+      "    razonSocial: " + js(c.responsable.razonSocial) + ",",
+      "    nit: " + js(c.responsable.nit),
+      "  },",
+      "",
+      "  // Dónde está guardada la tienda en GitHub (lo usa el panel). No es una contraseña.",
+      "  github: {",
+      "    usuario: " + js(c.github.usuario) + ",",
+      "    repositorio: " + js(c.github.repositorio) + ",",
+      "    rama: " + js(c.github.rama),
+      "  },",
+      "",
+      "  // true = muestra el aviso de \"tienda de demostración\"",
+      "  modoDemo: " + js(!!c.modoDemo),
+      "};",
+      ""
+    ].join("\n");
+  }
+
+  function lineas(t) { return t.split("\n").map(function (x) { return x.trim(); }).filter(Boolean); }
+
+  function abrirDatos() {
+    $("#error-datos").textContent = "";
+    var b = $("#btn-datos");
+    b.disabled = true;
+    leerConfig().then(function (c) {
+      b.disabled = false;
+      $("#d-nombre").value = c.nombre || "";
+      $("#d-eslogan").value = c.eslogan || "";
+      var w = String(c.whatsapp || "").replace(/^57/, "");
+      $("#d-whatsapp").value = w.length === 10 ? w.slice(0, 3) + " " + w.slice(3, 6) + " " + w.slice(6) : w;
+      $("#d-correo").value = c.correo || "";
+      $("#d-direccion").value = c.direccion || "";
+      $("#d-ciudad").value = c.ciudad || "";
+      $("#d-mapa").value = c.mapaUrl || "";
+      $("#d-horarios").value = (c.horarios || []).map(function (h) { return h.dias + ": " + h.horas; }).join("\n");
+      $("#d-instrucciones").value = (c.instruccionesRecogida || []).join("\n");
+      $("#d-razon").value = c.responsable ? c.responsable.razonSocial : "";
+      $("#d-nit").value = c.responsable ? c.responsable.nit : "";
+      $("#d-documento").checked = !!c.pedirDocumento;
+      $("#d-demo").checked = !!c.modoDemo;
+      $("#dlg-datos").showModal();
+    }).catch(function (e) { b.disabled = false; aviso(mensajeError(e), 6000); });
+  }
+
+  function guardarDatos(e) {
+    e.preventDefault();
+    if (ocupado) return;
+    var cel = $("#d-whatsapp").value.replace(/\D/g, "").replace(/^57(?=\d{10}$)/, "");
+    var correo = $("#d-correo").value.trim();
+    var mapa = $("#d-mapa").value.trim();
+    var horarios = lineas($("#d-horarios").value).map(function (l) {
+      // El primer «:» que no sea parte de una hora (ej. «9:00») separa días y horas
+      var m = /^([^:]*?\D)\s*:\s*(.+)$/.exec(l);
+      return m ? { dias: m[1].trim(), horas: m[2].trim() } : { dias: l, horas: "" };
+    });
+    var err = "";
+    if ($("#d-nombre").value.trim().length < 2) err = "Escribe el nombre de la tienda.";
+    else if (!/^3\d{9}$/.test(cel)) err = "El WhatsApp debe ser un celular colombiano de 10 dígitos que empiece por 3.";
+    else if (correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) err = "Revisa el correo.";
+    else if (!$("#d-direccion").value.trim() || !$("#d-ciudad").value.trim()) err = "Escribe la dirección y la ciudad.";
+    else if (mapa && !/^https:\/\//.test(mapa)) err = "El enlace del mapa debe empezar por https://";
+    else if (!horarios.length) err = "Escribe al menos un horario.";
+    $("#error-datos").textContent = err;
+    if (err) return;
+
+    var c = JSON.parse(JSON.stringify(cfgActual));
+    c.nombre = $("#d-nombre").value.trim();
+    c.eslogan = $("#d-eslogan").value.trim();
+    c.whatsapp = "57" + cel;
+    c.telefonoVisible = cel.slice(0, 3) + " " + cel.slice(3, 6) + " " + cel.slice(6);
+    c.correo = correo;
+    c.direccion = $("#d-direccion").value.trim();
+    c.ciudad = $("#d-ciudad").value.trim();
+    c.mapaUrl = mapa;
+    c.horarios = horarios;
+    c.instruccionesRecogida = lineas($("#d-instrucciones").value);
+    c.responsable = { razonSocial: $("#d-razon").value.trim(), nit: $("#d-nit").value.trim() };
+    c.pedirDocumento = $("#d-documento").checked;
+    c.modoDemo = $("#d-demo").checked;
+    c.github = cfgActual.github || GH;
+
+    var b = $("#btn-guardar-datos");
+    ocupado = true; b.disabled = true; b.textContent = "Publicando…";
+    gh("PUT", ARCHIVO_CONFIG, { message: "Actualiza datos de la tienda", content: aBase64(generarConfig(c)), sha: shaConfig, branch: RAMA }).then(function () {
+      cfgActual = c;
+      try { localStorage.setItem("config_reciente_v1", JSON.stringify({ t: Date.now(), config: c })); } catch (er) { /* nada */ }
+      ocupado = false; b.disabled = false; b.textContent = "Guardar y publicar";
+      $("#dlg-datos").close();
+      aviso("Datos guardados. En este dispositivo ya los ves en la tienda; para los clientes aparecen en unos minutos.", 5000);
+    }).catch(function (er) {
+      ocupado = false; b.disabled = false; b.textContent = "Guardar y publicar";
+      $("#error-datos").textContent = mensajeError(er);
+    });
+  }
+
   /* ---------- Contraseña del panel ----------
      La llave de GitHub se guarda en el repositorio (acceso.json) CIFRADA
      con la contraseña (AES-GCM + PBKDF2). Sin la contraseña no sirve. */
@@ -572,6 +732,10 @@
   /* ---------- Eventos ---------- */
   function eventos() {
     $("#form-clave").addEventListener("submit", entrarConClave);
+    $("#btn-datos").addEventListener("click", abrirDatos);
+    $("#form-datos").addEventListener("submit", guardarDatos);
+    $("#form-datos").addEventListener("input", function () { $("#error-datos").textContent = ""; });
+    $("#dlg-datos").addEventListener("cancel", function (e) { if (ocupado) e.preventDefault(); });
     $("#form-crear-clave").addEventListener("submit", crearClave);
     $("#form-conectar").addEventListener("submit", function (e) {
       e.preventDefault();
