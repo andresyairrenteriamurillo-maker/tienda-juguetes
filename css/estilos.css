@@ -384,3 +384,8 @@ button { cursor: pointer; }
   .pub__media .foto:has(img) { aspect-ratio: auto; display: block; }
   .pub__media .foto:has(img) img { position: static; display: block; width: 100%; height: auto; max-height: 72dvh; margin-inline: auto; }
 }
+
+/* Imagen del pedido */
+.pedido-imagen { display: grid; justify-items: center; gap: 10px; margin: 14px 0; }
+.pedido-imagen img { width: min(260px, 100%); border-radius: 14px; border: 1px solid var(--linea); box-shadow: 0 6px 20px rgba(0,0,0,.08); }
+.pedido-imagen .nota { margin: 0; }

@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/estilos.css?v=16">
+  <link rel="stylesheet" href="css/estilos.css?v=17">
   <script>
     // Aplica el modo noche antes de pintar la página (evita parpadeo)
     (function () {
@@ -250,6 +250,11 @@
       <h3>Completa el envío del mensaje en WhatsApp para que la tienda reciba tu pedido</h3>
       <p>Revisa el mensaje y pulsa <strong>Enviar</strong> dentro de WhatsApp. La tienda te confirmará la disponibilidad y el pago por ese chat.</p>
       <p class="nota">¿No se abrió WhatsApp? <a id="enlace-reintentar" target="_blank" rel="noopener" class="enlace">Ábrelo aquí</a>.</p>
+      <div class="pedido-imagen">
+        <img id="img-pedido" alt="Imagen del resumen de tu pedido" hidden>
+        <button class="btn btn--wa" id="btn-imagen-pedido" type="button"><span data-icon="share"></span> Enviar también como imagen</button>
+        <p class="nota" id="nota-imagen">Comparte la imagen en el mismo chat de la tienda.</p>
+      </div>
       <div class="post-envio__acciones">
         <button class="btn btn--primario" id="btn-ya-envie">Ya envié el mensaje</button>
         <button class="btn btn--texto" id="btn-volver-form">Volver y corregir</button>
@@ -259,7 +264,7 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="js/config.js?v=16"></script>
+  <script src="js/config.js?v=17"></script>
   <script>
     // Solo en el dispositivo del administrador: muestra al instante los datos recién guardados
     (function () {
@@ -269,7 +274,7 @@
       } catch (e) { /* se usan los datos normales */ }
     })();
   </script>
-  <script src="js/productos.js?v=16"></script>
+  <script src="js/productos.js?v=17"></script>
   <script>
     // Solo en el dispositivo del administrador: muestra al instante lo que se acaba
     // de guardar en el panel, mientras GitHub Pages publica el cambio (unos minutos).
@@ -285,7 +290,7 @@
       } catch (e) { /* se usa el catálogo normal */ }
     })();
   </script>
-  <script src="js/pedido.js?v=16"></script>
-  <script src="js/app.js?v=16"></script>
+  <script src="js/pedido.js?v=17"></script>
+  <script src="js/app.js?v=17"></script>
 </body>
 </html>

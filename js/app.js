@@ -413,6 +413,153 @@
 
   /* ---------- Formulario de pedido ---------- */
   var enlaceActual = "";
+  var ultimoPedido = null;   // copia del pedido enviado, para armar la imagen
+  var imagenPedido = null;   // Blob PNG ya generado
+
+  /* ---------- Imagen del pedido (resumen para compartir por WhatsApp) ---------- */
+  function cargarImg(src) {
+    return new Promise(function (ok) {
+      if (!src) { ok(null); return; }
+      var im = new Image();
+      im.crossOrigin = "anonymous";
+      im.onload = function () { ok(im); };
+      im.onerror = function () { ok(null); };
+      im.src = src;
+    });
+  }
+
+  function cortarTexto(ctx, texto, ancho) {
+    var palabras = String(texto).split(" "), lineas = [], actual = "";
+    palabras.forEach(function (p) {
+      var prueba = actual ? actual + " " + p : p;
+      if (ctx.measureText(prueba).width > ancho && actual) { lineas.push(actual); actual = p; }
+      else actual = prueba;
+    });
+    if (actual) lineas.push(actual);
+    return lineas.slice(0, 2);
+  }
+
+  function redondeado(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+
+  function generarImagenPedido(ped) {
+    var t = P.calcularTotales(ped.items);
+    var fuente = getComputedStyle(document.body).fontFamily || "sans-serif";
+    return Promise.all(t.lineas.map(function (l) { return cargarImg(l.producto.imagen); })).then(function (fotos) {
+      var W = 1080, M = 60, FOTO = 150, FILA = 190;
+      var H = 330 + t.lineas.length * FILA + 360 + (ped.datos.observaciones ? 80 : 0);
+      var c = document.createElement("canvas");
+      c.width = W; c.height = H;
+      var x = c.getContext("2d");
+      var f = function (peso, tam) { x.font = peso + " " + tam + "px " + fuente; };
+
+      x.fillStyle = "#FFFFFF"; x.fillRect(0, 0, W, H);
+      // Encabezado
+      x.fillStyle = "#FFD54A"; x.fillRect(0, 0, W, 210);
+      x.fillStyle = "#15192B"; f("800", 56); x.textBaseline = "alphabetic";
+      x.fillText("🧸 " + CFG.nombre, M, 105);
+      f("500", 32);
+      var fecha = new Date();
+      x.fillText("Pedido · " + fecha.toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" }) + " · " + fecha.toLocaleTimeString("es-CO", { hour: "numeric", minute: "2-digit" }), M, 165);
+
+      // Cliente
+      var y = 275;
+      f("700", 34); x.fillStyle = "#15192B";
+      x.fillText(P.limpiarTexto(ped.datos.nombre, 60), M, y);
+      f("500", 30); x.fillStyle = "#5B6075";
+      var cel = P.normalizarCelular(ped.datos.celular);
+      x.fillText("Cel. " + cel.slice(0, 3) + " " + cel.slice(3, 6) + " " + cel.slice(6) + " · " + (P.NOMBRES_PAGO[ped.datos.metodoPago] || ""), M, y + 44);
+      y += 80;
+
+      // Productos
+      t.lineas.forEach(function (l, i) {
+        var top = y + i * FILA;
+        x.strokeStyle = "#ECEEF3"; x.lineWidth = 2;
+        x.beginPath(); x.moveTo(M, top); x.lineTo(W - M, top); x.stroke();
+        var fy = top + 20;
+        x.save(); redondeado(x, M, fy, FOTO, FOTO, 22); x.clip();
+        var cat = catPorClave[l.producto.categoria] || { emoji: "🎁", color: "#8B5CF6" };
+        x.fillStyle = "#F3F4F7"; x.fillRect(M, fy, FOTO, FOTO);
+        if (fotos[i]) {
+          var im = fotos[i], k = Math.min(FOTO / im.width, FOTO / im.height);
+          var w = im.width * k, h = im.height * k;
+          x.drawImage(im, M + (FOTO - w) / 2, fy + (FOTO - h) / 2, w, h);
+        } else {
+          f("400", 80); x.textAlign = "center"; x.textBaseline = "middle";
+          x.fillText(cat.emoji, M + FOTO / 2, fy + FOTO / 2 + 4);
+          x.textAlign = "left"; x.textBaseline = "alphabetic";
+        }
+        x.restore();
+
+        var tx = M + FOTO + 30, ancho = W - M - tx - 230;
+        f("700", 34); x.fillStyle = "#15192B";
+        var ln = cortarTexto(x, l.producto.nombre, ancho);
+        ln.forEach(function (s, j) { x.fillText(s, tx, fy + 48 + j * 42); });
+        f("500", 30); x.fillStyle = "#5B6075";
+        x.fillText(l.cantidad + " × " + P.formatearCOP(l.unitario) + "  ·  Ref. " + l.producto.id, tx, fy + 48 + ln.length * 42 + 8);
+        f("800", 36); x.fillStyle = "#15192B"; x.textAlign = "right";
+        x.fillText(P.formatearCOP(l.subtotal), W - M, fy + 48);
+        x.textAlign = "left";
+      });
+      y += t.lineas.length * FILA;
+
+      // Total
+      x.fillStyle = "#15192B"; redondeado(x, M, y + 10, W - 2 * M, 110, 26); x.fill();
+      x.fillStyle = "#FFFFFF"; f("700", 38); x.fillText("Total (" + t.unidades + (t.unidades === 1 ? " unidad)" : " unidades)"), M + 36, y + 80);
+      f("800", 46); x.textAlign = "right"; x.fillText(P.formatearCOP(t.total, true), W - M - 36, y + 82); x.textAlign = "left";
+      y += 170;
+
+      f("500", 30); x.fillStyle = "#5B6075";
+      if (ped.datos.observaciones) {
+        x.fillText("Observaciones: " + cortarTexto(x, P.limpiarTexto(ped.datos.observaciones, 200), W - 2 * M - 220)[0], M, y);
+        y += 80;
+      }
+      var dir = cortarTexto(x, "📍 Recoger en: " + CFG.direccion + ", " + CFG.ciudad, W - 2 * M);
+      dir.forEach(function (s, j) { x.fillText(s, M, y + j * 42); });
+      x.fillText("Pedido pendiente de confirmación por WhatsApp.", M, y + dir.length * 42 + 12);
+
+      return new Promise(function (ok, falla) {
+        try { c.toBlob(function (b) { b ? ok(b) : falla(new Error("sin imagen")); }, "image/png"); }
+        catch (e) { falla(e); }
+      });
+    });
+  }
+
+  function prepararImagenPedido() {
+    imagenPedido = null;
+    var img = $("#img-pedido");
+    img.hidden = true;
+    $("#btn-imagen-pedido").disabled = true;
+    if (!ultimoPedido) return;
+    generarImagenPedido(ultimoPedido).then(function (blob) {
+      imagenPedido = blob;
+      img.src = URL.createObjectURL(blob);
+      img.hidden = false;
+      $("#btn-imagen-pedido").disabled = false;
+    }).catch(function () {
+      $("#nota-imagen").textContent = "No se pudo crear la imagen en este navegador. El pedido por texto ya es suficiente.";
+    });
+  }
+
+  function compartirImagenPedido() {
+    if (!imagenPedido) return;
+    var nombreArchivo = "pedido-" + CFG.nombre.toLowerCase().replace(/[^a-z0-9]+/g, "-") + ".png";
+    var archivo = null;
+    try { archivo = new File([imagenPedido], nombreArchivo, { type: "image/png" }); } catch (e) { /* navegador antiguo */ }
+    if (archivo && navigator.canShare && navigator.canShare({ files: [archivo] })) {
+      navigator.share({ files: [archivo], title: "Pedido " + CFG.nombre }).catch(function () {});
+      return;
+    }
+    // Computador u otro navegador: se descarga para adjuntarla en WhatsApp
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(imagenPedido);
+    a.download = nombreArchivo;
+    document.body.appendChild(a); a.click(); a.remove();
+    aviso("Imagen descargada. Adjúntala en el chat de la tienda en WhatsApp.");
+  }
 
   function marcarEstado(n) {
     $$("#estados li").forEach(function (li) {
@@ -494,6 +641,7 @@
     var items = itemsCarrito();
     if (!items.length) { aviso("Tu carrito está vacío."); return; }
 
+    ultimoPedido = { datos: datos, items: items.map(function (it) { return { producto: it.producto, cantidad: it.cantidad }; }) };
     var mensaje = P.construirMensaje(datos, items, CFG);
     enlaceActual = P.construirEnlaceWhatsApp(CFG.whatsapp, mensaje);
     window.open(enlaceActual, "_blank", "noopener");
@@ -503,6 +651,7 @@
     $("#post-envio").hidden = false;
     $("#post-envio").focus();
     marcarEstado(3);
+    prepararImagenPedido();
   }
 
   /* ---------- Eventos ---------- */
@@ -586,6 +735,7 @@
     $("#btn-volver-form").addEventListener("click", function () {
       $("#post-envio").hidden = true; form.hidden = false; revisarListo();
     });
+    $("#btn-imagen-pedido").addEventListener("click", compartirImagenPedido);
     $("#btn-ya-envie").addEventListener("click", function () {
       vaciar();
       form.reset();
