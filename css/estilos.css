@@ -375,3 +375,12 @@ button { cursor: pointer; }
 .btn--editar { border: 2px dashed var(--linea); background: transparent; color: inherit; justify-content: center; text-decoration: none; }
 .btn--editar:hover { border-color: var(--tinta-suave); }
 [data-tema="oscuro"] .barra-admin { background: #2a2512; }
+
+/* ---------- Foto completa en el detalle (sin recortar) ---------- */
+.foto img + .foto__emoji { display: none; }
+.pub__media .foto { background: var(--gris); }
+.pub__media .foto img { object-fit: contain; }
+@media (max-width: 735px) {
+  .pub__media .foto:has(img) { aspect-ratio: auto; display: block; }
+  .pub__media .foto:has(img) img { position: static; display: block; width: 100%; height: auto; max-height: 72dvh; margin-inline: auto; }
+}
