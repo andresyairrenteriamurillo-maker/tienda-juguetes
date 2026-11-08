@@ -325,7 +325,8 @@
     else if (promo !== null && promo >= precio) err = "El precio en promoción debe ser menor que el precio normal.";
     if (err) { $("#error-producto").textContent = err; return; }
 
-    var id = editando ? editando.id : siguienteId();
+    // Los productos de ejemplo tienen código DEMO-xx: al editarlos pasan a ser reales con código propio
+    var id = editando && !/^DEMO-/.test(editando.id) ? editando.id : siguienteId();
     var hoy = new Date();
     var fecha = hoy.getFullYear() + "-" + String(hoy.getMonth() + 1).padStart(2, "0") + "-" + String(hoy.getDate()).padStart(2, "0");
     var anterior = editando ? editando.imagen : "";
@@ -349,7 +350,7 @@
     var paso = fotoNueva ? subirFoto(id, fotoNueva).then(function (ruta) { datos.imagen = ruta; }) : Promise.resolve();
     paso.then(function () {
       bloquear(true, "Publicando…");
-      if (editando) productos = productos.map(function (x) { return x.id === id ? datos : x; });
+      if (editando) productos = productos.map(function (x) { return x.id === editando.id ? datos : x; });
       else productos = productos.concat([datos]);
       return guardarCatalogo((editando ? "Actualiza " : "Agrega ") + nombre);
     }).then(function () {
