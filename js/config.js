@@ -23,7 +23,7 @@ window.TIENDA_CONFIG = {
   correo: "contacto@tutienda.com",
 
   // Dirección donde los clientes recogen sus pedidos
-  direccion: "Calle 00 # 00-00, Barrio Ejemplo",
+  direccion: "EL CUNDUY",
   ciudad: "Florencia-Caquetá, Colombia",
 
   // Enlace de Google Maps (opcional). "" si no tienes.
