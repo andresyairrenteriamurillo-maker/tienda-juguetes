@@ -125,18 +125,42 @@
     return f < p.precio ? Math.round((1 - f / p.precio) * 100) : 0;
   }
 
-  // Cada juguete es una "publicación" en la cuadrícula
+  // Tarjeta de cada juguete: foto, nombre, descripción corta, precio y botón para agregar sin abrirlo
   function tarjeta(p) {
     var disponible = P.estaDisponible(p);
     var dcto = descuento(p);
-    return '<button class="post' + (disponible ? "" : " post--agotado") + '" data-detalle="' + esc(p.id) + '" aria-label="' + esc(p.nombre) + ", " + P.formatearCOP(P.precioFinal(p)) + (disponible ? "" : ", agotado") + '">' +
-      imagenProducto(p, "foto") +
-      (dcto ? '<span class="post__dcto">-' + dcto + "%</span>" : "") +
-      (p.demo ? '<span class="post__demo">Ejemplo</span>' : "") +
-      (!disponible ? '<span class="post__agotado">Agotado</span>' : "") +
-      '<span class="post__precio">' + P.formatearCOP(P.precioFinal(p)) + "</span>" +
-      '<span class="post__hover"><strong>' + esc(p.nombre) + "</strong><span>Ver juguete</span></span>" +
-      "</button>";
+    var final = P.precioFinal(p);
+    var enCarrito = carrito[p.id] || 0;
+    return '<article class="post' + (disponible ? "" : " post--agotado") + '">' +
+      '<button class="post__abrir" data-detalle="' + esc(p.id) + '" aria-label="Ver ' + esc(p.nombre) + '">' +
+        '<span class="post__media">' + imagenProducto(p, "foto") +
+          (dcto ? '<span class="post__dcto">-' + dcto + "%</span>" : "") +
+          (p.demo ? '<span class="post__demo">Ejemplo</span>' : "") +
+          (!disponible ? '<span class="post__agotado">Agotado</span>' : "") +
+        "</span>" +
+        '<span class="post__nombre">' + esc(p.nombre) + "</span>" +
+        (p.descripcion ? '<span class="post__desc">' + esc(p.descripcion) + "</span>" : "") +
+      "</button>" +
+      '<div class="post__pie">' +
+        '<span class="post__precio">' +
+          (final < p.precio ? '<s>' + P.formatearCOP(p.precio) + "</s>" : "") +
+          "<strong>" + P.formatearCOP(final) + "</strong></span>" +
+        '<button class="post__carrito" data-agregar="' + esc(p.id) + '"' + (disponible ? "" : " disabled") +
+          ' aria-label="' + (disponible ? "Agregar " + esc(p.nombre) + " al carrito" : "Agotado") + '">' +
+          icono("cart") + '<span class="post__mas" aria-hidden="true">+</span>' +
+          '<span class="post__en"' + (enCarrito ? "" : " hidden") + ' data-en="' + esc(p.id) + '">' + enCarrito + "</span>" +
+        "</button>" +
+      "</div>" +
+      "</article>";
+  }
+
+  // Número sobre el carrito de cada tarjeta: cuántas unidades ya están en el pedido
+  function marcarTarjetas() {
+    $$("[data-en]").forEach(function (el) {
+      var n = carrito[el.getAttribute("data-en")] || 0;
+      el.textContent = n;
+      el.hidden = !n;
+    });
   }
 
   function pintarLista(sel, lista, vacio) {
@@ -294,6 +318,7 @@
     var contador = $("#contador-carrito");
     contador.textContent = t.unidades;
     contador.classList.toggle("contador--vacio", t.unidades === 0);
+    marcarTarjetas();
     if (animar) {
       contador.classList.remove("rebote"); void contador.offsetWidth; contador.classList.add("rebote");
     }

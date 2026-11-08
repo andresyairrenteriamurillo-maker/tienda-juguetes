@@ -123,22 +123,33 @@ button { cursor: pointer; }
 .resultado { margin: 4px 0 12px; color: var(--tinta-suave); font-weight: 500; font-size: .9rem; }
 
 /* ---------- Cuadrícula de publicaciones ---------- */
-.cuadricula { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding-bottom: 40px; }
-.post { position: relative; display: block; padding: 0; border: 0; background: none; aspect-ratio: 1; overflow: hidden; }
+.cuadricula { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; padding-bottom: 40px; }
+.post { position: relative; display: flex; flex-direction: column; background: var(--superficie); border: 1px solid var(--linea); border-radius: 16px; overflow: hidden; transition: box-shadow .2s, transform .2s; }
+@media (hover: hover) { .post:hover { box-shadow: 0 8px 24px rgba(21, 25, 43, .12); transform: translateY(-2px); } }
+.post__abrir { display: flex; flex-direction: column; flex: 1; padding: 0; border: 0; background: none; text-align: left; color: inherit; font: inherit; cursor: pointer; }
+.post__media { position: relative; display: block; aspect-ratio: 1; overflow: hidden; }
 .post .foto { height: 100%; aspect-ratio: auto; }
 .foto { --c: var(--cobalto); position: relative; aspect-ratio: 1; display: grid; place-items: center; background: radial-gradient(circle at 50% 45%, var(--brillo), transparent 60%), color-mix(in srgb, var(--c) 16%, var(--fondo)); overflow: hidden; }
-.foto img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
-.foto__emoji { font-size: clamp(2.6rem, 9vw, 5.4rem); transition: transform .3s; }
-.post:hover .foto__emoji { transform: scale(1.08); }
-.post__precio { position: absolute; left: 8px; bottom: 8px; z-index: 2; background: rgba(21, 25, 43, .82); color: #fff; font-weight: 700; font-size: .82rem; padding: 3px 9px; border-radius: 8px; }
+.foto img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; transition: transform .3s; }
+@media (hover: hover) { .post:hover .foto img { transform: scale(1.04); } }
+.foto__emoji { font-size: clamp(2.6rem, 9vw, 5.4rem); }
+.post__nombre { margin: 10px 12px 0; font-weight: 700; font-size: .9rem; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.post__desc { margin: 4px 12px 0; font-size: .76rem; line-height: 1.3; color: var(--tinta-suave); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.post__pie { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; padding: 10px 12px 12px; }
+.post__precio { display: grid; line-height: 1.1; min-width: 0; }
+.post__precio strong { font-family: "Bricolage Grotesque", sans-serif; font-size: 1.25rem; font-weight: 800; color: var(--tomate); white-space: nowrap; }
+.post__precio s { font-size: .74rem; color: var(--tinta-suave); }
+.post__carrito { position: relative; flex: none; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--tomate); color: #fff; box-shadow: 0 4px 12px color-mix(in srgb, var(--tomate) 40%, transparent); cursor: pointer; transition: transform .15s; }
+.post__carrito .ico { width: 20px; height: 20px; }
+.post__carrito:active { transform: scale(.92); }
+.post__carrito:disabled { background: var(--linea); color: var(--tinta-suave); box-shadow: none; cursor: not-allowed; }
+.post__mas { position: absolute; top: 5px; right: 7px; font-weight: 800; font-size: .8rem; line-height: 1; }
+.post__en { position: absolute; top: -4px; left: -4px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; display: grid; place-items: center; background: var(--tinta); color: var(--fondo); font-size: .72rem; font-weight: 700; }
+.post__en[hidden] { display: none; }
 .post__dcto { position: absolute; right: 8px; top: 8px; z-index: 2; background: var(--tomate); color: #fff; font-weight: 700; font-size: .8rem; padding: 2px 8px; border-radius: 8px; }
 .post__demo { position: absolute; left: 8px; top: 8px; z-index: 2; background: var(--etiqueta); color: var(--tinta-suave); font-weight: 700; font-size: .68rem; padding: 2px 7px; border-radius: 6px; }
 .post__agotado { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; background: var(--velo); font-weight: 700; color: var(--tinta); }
 .post--agotado .foto { filter: grayscale(.9); }
-.post__hover { position: absolute; inset: 0; z-index: 3; display: grid; place-content: center; gap: 6px; padding: 12px; text-align: center; background: rgba(21, 25, 43, .55); color: #fff; opacity: 0; transition: opacity .2s; }
-.post__hover strong { font-size: 1rem; line-height: 1.25; }
-.post__hover span { font-size: .82rem; }
-@media (hover: hover) { .post:hover .post__hover { opacity: 1; } }
 .vacio { color: var(--tinta-suave); text-align: center; padding: 48px 16px; grid-column: 1 / -1; }
 
 .precio__antes { text-decoration: line-through; color: var(--tinta-suave); font-size: .92rem; }
@@ -324,6 +335,7 @@ button { cursor: pointer; }
 :root[data-tema="oscuro"] .icono-btn .ico-sol { display: block; }
 
 /* ---------- Responsive ---------- */
+@media (max-width: 900px) and (min-width: 736px) { .cuadricula { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 735px) {
   body { font-size: 14px; }
   .perfil-ancho { padding-inline: 14px; }
@@ -347,10 +359,15 @@ button { cursor: pointer; }
   .historia__circulo { font-size: 1.5rem; }
   .pestanas { gap: 0; justify-content: space-around; margin-inline: -14px; top: 60px; }
   .pestana { flex: 1; justify-content: center; }
-  .cuadricula { gap: 2px; margin-inline: -14px; }
-  .post__precio { left: 5px; bottom: 5px; font-size: .72rem; padding: 2px 6px; border-radius: 6px; }
-  .post__dcto { right: 5px; top: 5px; font-size: .7rem; padding: 1px 6px; }
-  .post__demo { left: 5px; top: 5px; font-size: .6rem; padding: 1px 5px; }
+  .cuadricula { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .post { border-radius: 14px; }
+  .post__nombre { margin: 8px 10px 0; font-size: .84rem; }
+  .post__desc { margin: 3px 10px 0; font-size: .72rem; }
+  .post__pie { padding: 8px 10px 10px; }
+  .post__precio strong { font-size: 1.12rem; }
+  .post__carrito { width: 40px; height: 40px; }
+  .post__dcto { right: 6px; top: 6px; font-size: .72rem; padding: 1px 6px; }
+  .post__demo { left: 6px; top: 6px; font-size: .6rem; padding: 1px 5px; }
   .panel-tienda { grid-template-columns: 1fr; }
   .pub { grid-template-columns: 1fr; height: auto; }
   .dialogo--post { overflow: auto; }
