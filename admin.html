@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/estilos.css?v=19">
-  <link rel="stylesheet" href="css/admin.css?v=19">
+  <link rel="stylesheet" href="css/admin.css?v=20">
   <script>(function(){var t=null;try{t=localStorage.getItem("tema")}catch(e){}if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"oscuro":"claro";document.documentElement.setAttribute("data-tema",t)})();</script>
 </head>
 <body>
@@ -86,6 +86,7 @@
           <p class="nota" id="resumen-productos"></p>
         </div>
         <span class="admin-cabecera__botones">
+          <button class="btn btn--gris" id="btn-categorias">🏷️ Categorías</button>
           <button class="btn btn--gris" id="btn-datos">⚙️ Datos de la tienda</button>
           <button class="btn btn--primario" id="btn-nuevo"><span data-icon="plus"></span> Agregar juguete</button>
         </span>
@@ -179,6 +180,24 @@
     </form>
   </dialog>
 
+  <!-- CATEGORÍAS -->
+  <dialog id="dlg-categorias" class="dialogo dialogo--ancho" aria-labelledby="titulo-cats">
+    <div class="dialogo__cabecera">
+      <h2 id="titulo-cats">Categorías</h2>
+      <button class="btn-icono" data-cerrar aria-label="Cerrar"><span data-icon="x"></span></button>
+    </div>
+    <form id="form-categorias" class="form-producto" novalidate>
+      <p class="nota">Cambia el emoji o el nombre tocándolos. En la tienda solo se ven las categorías que tienen juguetes. Para borrar una, primero pasa sus juguetes a otra categoría.</p>
+      <ul class="lista-cats" id="lista-cats"></ul>
+      <button type="button" class="btn btn--gris" id="btn-agregar-cat"><span data-icon="plus"></span> Agregar categoría</button>
+      <p class="error" id="error-cats" role="alert"></p>
+      <div class="form-producto__botones">
+        <button type="button" class="btn btn--gris" data-cerrar>Cancelar</button>
+        <button type="submit" class="btn btn--primario" id="btn-guardar-cats">Guardar y publicar</button>
+      </div>
+    </form>
+  </dialog>
+
   <!-- DATOS DE LA TIENDA -->
   <dialog id="dlg-datos" class="dialogo dialogo--ancho" aria-labelledby="titulo-datos">
     <div class="dialogo__cabecera">
@@ -231,6 +250,6 @@
 
   <script src="js/config.js?v=19"></script>
   <script src="js/pedido.js?v=19"></script>
-  <script src="js/admin.js?v=19"></script>
+  <script src="js/admin.js?v=20"></script>
 </body>
 </html>

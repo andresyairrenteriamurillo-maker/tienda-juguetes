@@ -283,7 +283,7 @@
     fotoNueva = null;
     quitarFoto = false;
     $("#titulo-form").textContent = p ? "Editar juguete" : "Agregar juguete";
-    $("#p-categoria").innerHTML = categorias.map(function (c) { return '<option value="' + esc(c.clave) + '">' + c.emoji + " " + esc(c.nombre) + "</option>"; }).join("");
+    pintarSelectCategorias();
     $("#p-nombre").value = p ? p.nombre : "";
     $("#p-descripcion").value = p ? p.descripcion : "";
     $("#p-precio").value = p ? p.precio : "";
@@ -297,6 +297,118 @@
     vistaFoto(p && p.imagen ? p.imagen : "");
     $("#dlg-producto").showModal();
     setTimeout(function () { $("#p-nombre").focus(); }, 50);
+  }
+
+  /* ---------- Categorías ---------- */
+  var COLORES = ["#14B8A6", "#A855F7", "#F59E0B", "#0EA5E9", "#84CC16", "#E11D48", "#64748B", "#DB2777", "#059669", "#7C3AED"];
+  var catNueva = null;  // categoría creada desde el formulario del juguete, aún sin guardar
+
+  function claveDe(nombre, usadas) {
+    var base = nombre.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 24) || "categoria";
+    var clave = base, n = 2;
+    while (usadas.indexOf(clave) !== -1 || clave === "__promo") clave = base + n++;
+    return clave;
+  }
+
+  function crearCategoria(nombre, emoji, lista) {
+    return {
+      clave: claveDe(nombre, lista.map(function (c) { return c.clave; })),
+      nombre: nombre,
+      emoji: emoji || "🎁",
+      color: COLORES[lista.length % COLORES.length]
+    };
+  }
+
+  function limpiarNombre(t) { return String(t || "").trim().replace(/\s+/g, " ").slice(0, 40); }
+
+  function pintarSelectCategorias(elegida) {
+    var sel = $("#p-categoria");
+    sel.innerHTML = categorias.map(function (c) { return '<option value="' + esc(c.clave) + '">' + c.emoji + " " + esc(c.nombre) + "</option>"; }).join("") +
+      '<option value="__nueva">➕ Nueva categoría…</option>';
+    if (elegida) sel.value = elegida;
+  }
+
+  function elegirCategoria() {
+    var sel = $("#p-categoria");
+    if (sel.value !== "__nueva") { sel.dataset.antes = sel.value; return; }
+    var nombre = limpiarNombre(window.prompt("Nombre de la nueva categoría (ej.: Loncheras y morrales)", ""));
+    if (nombre.length < 2) { sel.value = sel.dataset.antes || (categorias[0] ? categorias[0].clave : ""); return; }
+    var existe = categorias.filter(function (c) { return c.nombre.toLowerCase() === nombre.toLowerCase(); })[0];
+    if (existe) { pintarSelectCategorias(existe.clave); sel.dataset.antes = existe.clave; return; }
+    if (catNueva) categorias = categorias.filter(function (c) { return c !== catNueva; });
+    catNueva = crearCategoria(nombre, "🎁", categorias);
+    categorias = categorias.concat([catNueva]);
+    pintarSelectCategorias(catNueva.clave);
+    sel.dataset.antes = catNueva.clave;
+    aviso("Categoría «" + nombre + "» lista. Se guarda junto con el juguete; el emoji lo cambias en «Categorías».", 5000);
+  }
+
+  // Si se cancela el formulario, la categoría nueva sin juguetes se descarta
+  function descartarCatNueva() {
+    if (!catNueva) return;
+    var c = catNueva;
+    catNueva = null;
+    if (!productos.some(function (p) { return p.categoria === c.clave; })) categorias = categorias.filter(function (x) { return x !== c; });
+  }
+
+  var borradorCats = [];
+  function cuantos(clave) { return productos.filter(function (p) { return p.categoria === clave; }).length; }
+
+  function pintarCategorias() {
+    $("#lista-cats").innerHTML = borradorCats.map(function (c, i) {
+      var n = c.clave ? cuantos(c.clave) : 0;
+      return '<li class="cat-fila" data-i="' + i + '">' +
+        '<input class="cat-fila__emoji" value="' + esc(c.emoji) + '" maxlength="8" aria-label="Emoji de la categoría" data-campo="emoji">' +
+        '<input class="cat-fila__nombre" value="' + esc(c.nombre) + '" maxlength="40" placeholder="Nombre de la categoría" aria-label="Nombre de la categoría" data-campo="nombre">' +
+        '<span class="cat-fila__n">' + (n === 1 ? "1 juguete" : n + " juguetes") + "</span>" +
+        '<button type="button" class="btn-icono btn--peligro" data-quitar="' + i + '"' + (n ? ' disabled title="Tiene juguetes: pásalos a otra categoría primero"' : "") + ' aria-label="Borrar categoría ' + esc(c.nombre) + '">' + icono("trash") + "</button>" +
+        "</li>";
+    }).join("");
+  }
+
+  function abrirCategorias() {
+    borradorCats = categorias.map(function (c) { return { clave: c.clave, nombre: c.nombre, emoji: c.emoji, color: c.color }; });
+    $("#error-cats").textContent = "";
+    pintarCategorias();
+    $("#dlg-categorias").showModal();
+  }
+
+  function bloquearCats(si) {
+    ocupado = si;
+    var b = $("#btn-guardar-cats");
+    b.disabled = si;
+    b.textContent = si ? "Publicando…" : "Guardar y publicar";
+  }
+
+  function guardarCategorias(e) {
+    e.preventDefault();
+    if (ocupado) return;
+    var lista = [], vistos = {}, err = "";
+    borradorCats.forEach(function (c) {
+      var nombre = limpiarNombre(c.nombre);
+      if (!c.clave && !nombre) return;  // fila nueva vacía: se ignora
+      if (nombre.length < 2) err = err || "Cada categoría necesita un nombre.";
+      else if (vistos[nombre.toLowerCase()]) err = err || "Hay dos categorías llamadas «" + nombre + "».";
+      vistos[nombre.toLowerCase()] = true;
+      var emoji = String(c.emoji || "").trim() || "🎁";
+      lista.push(c.clave ? { clave: c.clave, nombre: nombre, emoji: emoji, color: c.color } : crearCategoria(nombre, emoji, lista.concat(categorias)));
+    });
+    if (!err && !lista.length) err = "Debe quedar al menos una categoría.";
+    if (err) { $("#error-cats").textContent = err; return; }
+
+    var copia = categorias;
+    categorias = lista;
+    bloquearCats(true);
+    guardarCatalogo("Actualiza categorías").then(function () {
+      bloquearCats(false);
+      $("#dlg-categorias").close();
+      pintarLista();
+      aviso("Categorías guardadas. Para los clientes se actualizan en unos minutos.", 4500);
+    }).catch(function (er) {
+      categorias = copia;
+      bloquearCats(false);
+      $("#error-cats").textContent = mensajeError(er);
+    });
   }
 
   function vistaFoto(src) {
@@ -354,6 +466,7 @@
       else productos = productos.concat([datos]);
       return guardarCatalogo((editando ? "Actualiza " : "Agrega ") + nombre);
     }).then(function () {
+      catNueva = null;
       if (anterior && anterior !== datos.imagen) borrarArchivo(anterior);
       bloquear(false);
       if (desdeTienda) {
@@ -734,6 +847,27 @@
   function eventos() {
     $("#form-clave").addEventListener("submit", entrarConClave);
     $("#btn-datos").addEventListener("click", abrirDatos);
+    $("#btn-categorias").addEventListener("click", abrirCategorias);
+    $("#form-categorias").addEventListener("submit", guardarCategorias);
+    $("#dlg-categorias").addEventListener("cancel", function (e) { if (ocupado) e.preventDefault(); });
+    $("#lista-cats").addEventListener("input", function (e) {
+      var f = e.target.closest(".cat-fila"), campo = e.target.getAttribute("data-campo");
+      if (f && campo) borradorCats[+f.getAttribute("data-i")][campo] = e.target.value;
+      $("#error-cats").textContent = "";
+    });
+    $("#lista-cats").addEventListener("click", function (e) {
+      var b = e.target.closest("[data-quitar]");
+      if (!b || b.disabled) return;
+      borradorCats.splice(+b.getAttribute("data-quitar"), 1);
+      pintarCategorias();
+    });
+    $("#btn-agregar-cat").addEventListener("click", function () {
+      borradorCats.push({ clave: "", nombre: "", emoji: "🎁", color: "" });
+      pintarCategorias();
+      var filas = $$(".cat-fila__nombre");
+      filas[filas.length - 1].focus();
+    });
+    $("#p-categoria").addEventListener("change", elegirCategoria);
     $("#form-datos").addEventListener("submit", guardarDatos);
     $("#form-datos").addEventListener("input", function () { $("#error-datos").textContent = ""; });
     $("#dlg-datos").addEventListener("cancel", function (e) { if (ocupado) e.preventDefault(); });
@@ -810,6 +944,7 @@
     });
     // Si se vino desde la tienda y se cancela, se regresa a la tienda
     $("#dlg-producto").addEventListener("close", function () {
+      descartarCatNueva();
       if (desdeTienda && !ocupado) volverALaTienda(editando ? editando.id : "");
     });
     $("#dlg-producto").addEventListener("cancel", function (e) { if (ocupado) e.preventDefault(); });
