@@ -250,10 +250,12 @@
       <div class="pedido-imagen">
         <p class="nota" id="creando-imagen">Preparando la imagen de tu pedido…</p>
         <img id="img-pedido" alt="Imagen del resumen de tu pedido" hidden>
-        <button class="btn btn--wa btn--bloque" id="btn-imagen-pedido" type="button" disabled><span data-icon="chat"></span> <span id="txt-btn-imagen">Enviar pedido por WhatsApp</span></button>
-        <p class="paso-chat" id="nota-imagen"></p>
+        <button class="btn btn--wa btn--bloque" id="btn-enviar-directo" type="button"><span data-icon="chat"></span> Enviar pedido a la tienda</button>
+        <p class="paso-chat" id="nota-directo">Se abre el chat de la tienda con tu pedido ya escrito. Solo toca <strong>Enviar ➤</strong>.</p>
+        <button class="btn btn--gris btn--bloque" id="btn-imagen-pedido" type="button" disabled><span id="txt-btn-imagen">Compartir la imagen del pedido</span></button>
+        <p class="nota" id="nota-imagen"></p>
       </div>
-      <p class="nota">La tienda te confirmará la disponibilidad y el pago por ese chat. ¿Problemas con la imagen? <a id="enlace-reintentar" target="_blank" rel="noopener" class="enlace">Envía el pedido como texto</a>.</p>
+      <p class="nota">La tienda te confirmará la disponibilidad y el pago por ese chat.<a id="enlace-reintentar" hidden></a></p>
       <div class="post-envio__acciones">
         <button class="btn btn--primario" id="btn-ya-envie">Ya envié el pedido</button>
         <button class="btn btn--texto" id="btn-volver-form">Volver y corregir</button>
@@ -290,6 +292,6 @@
     })();
   </script>
   <script src="js/pedido.js?v=19"></script>
-  <script src="js/app.js?v=22"></script>
+  <script src="js/app.js?v=23"></script>
 </body>
 </html>

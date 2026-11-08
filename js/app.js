@@ -581,6 +581,8 @@
 
   function prepararImagenPedido() {
     imagenPedido = null;
+    $("#btn-imagen-pedido").hidden = false;
+    $("#nota-directo").innerHTML = "Se abre el chat de la tienda con tu pedido ya escrito. Solo toca <strong>Enviar ➤</strong>.";
     var img = $("#img-pedido");
     img.hidden = true;
     $("#creando-imagen").hidden = false;
@@ -593,20 +595,33 @@
       img.hidden = false;
       $("#creando-imagen").hidden = true;
       $("#btn-imagen-pedido").disabled = false;
-      if (puedeCompartirImagen()) {
-        $("#txt-btn-imagen").textContent = "Enviar pedido por WhatsApp";
-        $("#nota-imagen").innerHTML = "Toca el botón, elige <strong>WhatsApp</strong> y luego el chat de <strong>" + esc(CFG.nombre) + "</strong> (" + esc(CFG.telefonoVisible) + ").";
-      } else {
-        $("#txt-btn-imagen").textContent = "Descargar imagen y abrir WhatsApp";
-        $("#nota-imagen").innerHTML = "Se descarga la imagen y se abre el chat de la tienda. <strong>Adjunta la imagen</strong> (📎 o arrástrala) y envíala.";
-      }
+      $("#txt-btn-imagen").textContent = puedeCompartirImagen() ? "Compartir la imagen del pedido" : "Descargar la imagen del pedido";
     }).catch(function () {
-      // Sin imagen: se envía como texto, igual que antes
+      // Sin imagen: el pedido igual se envía como texto con el botón principal
       $("#creando-imagen").hidden = true;
-      $("#txt-btn-imagen").textContent = "Enviar pedido por WhatsApp";
-      $("#btn-imagen-pedido").disabled = false;
+      $("#btn-imagen-pedido").hidden = true;
       imagenPedido = null;
     });
+  }
+
+  // Botón principal: abre directo el chat de la tienda con el pedido escrito.
+  // Si se puede, deja también la imagen copiada para pegarla en ese mismo chat.
+  function puedeCopiarImagen() {
+    return !!(imagenPedido && navigator.clipboard && navigator.clipboard.write && window.ClipboardItem);
+  }
+  function enviarDirecto() {
+    marcarEstado(3);
+    var copiada = false;
+    if (puedeCopiarImagen()) {
+      try {
+        // Se llama dentro del toque del cliente; si el navegador lo rechaza, no pasa nada
+        navigator.clipboard.write([new ClipboardItem({ "image/png": imagenPedido })]).catch(function () {});
+        copiada = true;
+      } catch (e) { copiada = false; }
+    }
+    window.open(enlaceActual, "_blank", "noopener");
+    $("#nota-directo").innerHTML = "Se abrió el chat de <strong>" + esc(CFG.nombre) + "</strong> con tu pedido escrito. Toca <strong>Enviar ➤</strong>." +
+      (copiada ? "<br>📋 La imagen del pedido también quedó copiada: en ese chat mantén presionado donde se escribe y toca <strong>Pegar</strong> si quieres mandarla." : "");
   }
 
   function compartirImagenPedido() {
@@ -800,6 +815,7 @@
       $("#post-envio").hidden = true; form.hidden = false; revisarListo();
     });
     $("#btn-imagen-pedido").addEventListener("click", compartirImagenPedido);
+    $("#btn-enviar-directo").addEventListener("click", enviarDirecto);
     $("#btn-ya-envie").addEventListener("click", function () {
       vaciar();
       form.reset();
