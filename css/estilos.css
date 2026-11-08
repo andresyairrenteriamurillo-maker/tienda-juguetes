@@ -389,3 +389,6 @@ button { cursor: pointer; }
 .pedido-imagen { display: grid; justify-items: center; gap: 10px; margin: 14px 0; }
 .pedido-imagen img { width: min(260px, 100%); border-radius: 14px; border: 1px solid var(--linea); box-shadow: 0 6px 20px rgba(0,0,0,.08); }
 .pedido-imagen .nota { margin: 0; }
+.paso-chat { margin: 0; text-align: center; font-size: .92rem; }
+.paso-chat:empty { display: none; }
+.pedido-imagen .btn--bloque { max-width: 360px; }

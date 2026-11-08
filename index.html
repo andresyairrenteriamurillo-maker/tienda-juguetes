@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/estilos.css?v=17">
+  <link rel="stylesheet" href="css/estilos.css?v=18">
   <script>
     // Aplica el modo noche antes de pintar la página (evita parpadeo)
     (function () {
@@ -242,21 +242,20 @@
 
       <p class="aviso">Tu pedido queda confirmado solo cuando la tienda te responda por WhatsApp.</p>
 
-      <button type="submit" class="btn btn--wa btn--bloque"><span data-icon="chat"></span> Enviar pedido por WhatsApp</button>
+      <button type="submit" class="btn btn--wa btn--bloque"><span data-icon="chat"></span> Continuar</button>
     </form>
 
     <div id="post-envio" class="post-envio" hidden tabindex="-1">
-      <div class="post-envio__icono" aria-hidden="true">📲</div>
-      <h3>Completa el envío del mensaje en WhatsApp para que la tienda reciba tu pedido</h3>
-      <p>Revisa el mensaje y pulsa <strong>Enviar</strong> dentro de WhatsApp. La tienda te confirmará la disponibilidad y el pago por ese chat.</p>
-      <p class="nota">¿No se abrió WhatsApp? <a id="enlace-reintentar" target="_blank" rel="noopener" class="enlace">Ábrelo aquí</a>.</p>
+      <h3>Envía tu pedido a la tienda</h3>
       <div class="pedido-imagen">
+        <p class="nota" id="creando-imagen">Preparando la imagen de tu pedido…</p>
         <img id="img-pedido" alt="Imagen del resumen de tu pedido" hidden>
-        <button class="btn btn--wa" id="btn-imagen-pedido" type="button"><span data-icon="share"></span> Enviar también como imagen</button>
-        <p class="nota" id="nota-imagen">Comparte la imagen en el mismo chat de la tienda.</p>
+        <button class="btn btn--wa btn--bloque" id="btn-imagen-pedido" type="button" disabled><span data-icon="chat"></span> <span id="txt-btn-imagen">Enviar pedido por WhatsApp</span></button>
+        <p class="paso-chat" id="nota-imagen"></p>
       </div>
+      <p class="nota">La tienda te confirmará la disponibilidad y el pago por ese chat. ¿Problemas con la imagen? <a id="enlace-reintentar" target="_blank" rel="noopener" class="enlace">Envía el pedido como texto</a>.</p>
       <div class="post-envio__acciones">
-        <button class="btn btn--primario" id="btn-ya-envie">Ya envié el mensaje</button>
+        <button class="btn btn--primario" id="btn-ya-envie">Ya envié el pedido</button>
         <button class="btn btn--texto" id="btn-volver-form">Volver y corregir</button>
       </div>
     </div>
@@ -264,7 +263,7 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="js/config.js?v=17"></script>
+  <script src="js/config.js?v=18"></script>
   <script>
     // Solo en el dispositivo del administrador: muestra al instante los datos recién guardados
     (function () {
@@ -274,7 +273,7 @@
       } catch (e) { /* se usan los datos normales */ }
     })();
   </script>
-  <script src="js/productos.js?v=17"></script>
+  <script src="js/productos.js?v=18"></script>
   <script>
     // Solo en el dispositivo del administrador: muestra al instante lo que se acaba
     // de guardar en el panel, mientras GitHub Pages publica el cambio (unos minutos).
@@ -290,7 +289,7 @@
       } catch (e) { /* se usa el catálogo normal */ }
     })();
   </script>
-  <script src="js/pedido.js?v=17"></script>
-  <script src="js/app.js?v=17"></script>
+  <script src="js/pedido.js?v=18"></script>
+  <script src="js/app.js?v=18"></script>
 </body>
 </html>

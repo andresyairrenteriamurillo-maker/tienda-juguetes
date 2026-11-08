@@ -528,37 +528,60 @@
     });
   }
 
+  function archivoPedido() {
+    var nombre = "pedido-" + CFG.nombre.toLowerCase().normalize("NFD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + ".png";
+    try { return new File([imagenPedido], nombre, { type: "image/png" }); } catch (e) { return null; }
+  }
+  function puedeCompartirImagen() {
+    var f = imagenPedido && archivoPedido();
+    return !!(f && navigator.canShare && navigator.canShare({ files: [f] }));
+  }
+
   function prepararImagenPedido() {
     imagenPedido = null;
     var img = $("#img-pedido");
     img.hidden = true;
+    $("#creando-imagen").hidden = false;
     $("#btn-imagen-pedido").disabled = true;
+    $("#nota-imagen").textContent = "";
     if (!ultimoPedido) return;
     generarImagenPedido(ultimoPedido).then(function (blob) {
       imagenPedido = blob;
       img.src = URL.createObjectURL(blob);
       img.hidden = false;
+      $("#creando-imagen").hidden = true;
       $("#btn-imagen-pedido").disabled = false;
+      if (puedeCompartirImagen()) {
+        $("#txt-btn-imagen").textContent = "Enviar pedido por WhatsApp";
+        $("#nota-imagen").innerHTML = "Toca el botón, elige <strong>WhatsApp</strong> y luego el chat de <strong>" + esc(CFG.nombre) + "</strong> (" + esc(CFG.telefonoVisible) + ").";
+      } else {
+        $("#txt-btn-imagen").textContent = "Descargar imagen y abrir WhatsApp";
+        $("#nota-imagen").innerHTML = "Se descarga la imagen y se abre el chat de la tienda. <strong>Adjunta la imagen</strong> (📎 o arrástrala) y envíala.";
+      }
     }).catch(function () {
-      $("#nota-imagen").textContent = "No se pudo crear la imagen en este navegador. El pedido por texto ya es suficiente.";
+      // Sin imagen: se envía como texto, igual que antes
+      $("#creando-imagen").hidden = true;
+      $("#txt-btn-imagen").textContent = "Enviar pedido por WhatsApp";
+      $("#btn-imagen-pedido").disabled = false;
+      imagenPedido = null;
     });
   }
 
   function compartirImagenPedido() {
-    if (!imagenPedido) return;
-    var nombreArchivo = "pedido-" + CFG.nombre.toLowerCase().replace(/[^a-z0-9]+/g, "-") + ".png";
-    var archivo = null;
-    try { archivo = new File([imagenPedido], nombreArchivo, { type: "image/png" }); } catch (e) { /* navegador antiguo */ }
-    if (archivo && navigator.canShare && navigator.canShare({ files: [archivo] })) {
-      navigator.share({ files: [archivo], title: "Pedido " + CFG.nombre }).catch(function () {});
+    marcarEstado(3);
+    if (!imagenPedido) { window.open(enlaceActual, "_blank", "noopener"); return; }
+    var archivo = archivoPedido();
+    if (puedeCompartirImagen()) {
+      navigator.share({ files: [archivo], text: "Hola, " + CFG.nombre + ". Este es mi pedido." }).catch(function () {});
       return;
     }
-    // Computador u otro navegador: se descarga para adjuntarla en WhatsApp
+    // Computador: se descarga la imagen y se abre el chat de la tienda para adjuntarla
     var a = document.createElement("a");
     a.href = URL.createObjectURL(imagenPedido);
-    a.download = nombreArchivo;
+    a.download = archivo ? archivo.name : "pedido.png";
     document.body.appendChild(a); a.click(); a.remove();
-    aviso("Imagen descargada. Adjúntala en el chat de la tienda en WhatsApp.");
+    window.open(P.construirEnlaceWhatsApp(CFG.whatsapp, "Hola, " + CFG.nombre + ". Te envío mi pedido en la imagen adjunta."), "_blank", "noopener");
+    aviso("Imagen descargada. Adjúntala en el chat de la tienda.", 5000);
   }
 
   function marcarEstado(n) {
@@ -644,13 +667,12 @@
     ultimoPedido = { datos: datos, items: items.map(function (it) { return { producto: it.producto, cantidad: it.cantidad }; }) };
     var mensaje = P.construirMensaje(datos, items, CFG);
     enlaceActual = P.construirEnlaceWhatsApp(CFG.whatsapp, mensaje);
-    window.open(enlaceActual, "_blank", "noopener");
 
     $("#enlace-reintentar").href = enlaceActual;
     $("#form-pedido").hidden = true;
     $("#post-envio").hidden = false;
     $("#post-envio").focus();
-    marcarEstado(3);
+    marcarEstado(2);
     prepararImagenPedido();
   }
 
