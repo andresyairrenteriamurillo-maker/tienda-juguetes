@@ -60,5 +60,5 @@ window.TIENDA_CONFIG = {
   },
 
   // true = muestra el aviso de "tienda de demostración"
-  modoDemo: true
+  modoDemo: false
 };
