@@ -536,7 +536,10 @@
     } catch (e) { /* sin almacenamiento: queda solo mientras la página esté abierta */ }
   }
   function borrarToken() {
-    try { sessionStorage.removeItem(CLAVE_TOKEN); localStorage.removeItem(CLAVE_TOKEN); } catch (e) { /* nada */ }
+    try {
+      sessionStorage.removeItem(CLAVE_TOKEN); localStorage.removeItem(CLAVE_TOKEN);
+      localStorage.removeItem(CLAVE_RECIENTE); localStorage.removeItem("config_reciente_v1");
+    } catch (e) { /* nada */ }
   }
 
   function conectar(t, recordar, desdeFormulario) {
@@ -883,6 +886,9 @@
       conectar(t, $("#recordar").checked, true).then(function () { $("#token").value = ""; });
     });
 
+    $("#btn-cerrar-sesion").addEventListener("click", function () {
+      if (window.confirm("¿Cerrar sesión en este dispositivo? Para volver a entrar necesitarás tu contraseña del panel.")) $("#btn-desconectar").click();
+    });
     $("#btn-desconectar").addEventListener("click", function () {
       borrarToken();
       token = "";

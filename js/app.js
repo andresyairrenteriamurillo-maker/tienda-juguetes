@@ -830,6 +830,13 @@
   /* ---------- Inicio ---------- */
   $("#barra-admin").hidden = !esAdmin;
   $("#btn-admin").classList.toggle("btn-admin--activo", esAdmin);
+  $("#btn-salir-admin").addEventListener("click", function () {
+    if (!window.confirm("¿Cerrar sesión del administrador en este dispositivo? Para volver a entrar necesitarás tu contraseña del panel.")) return;
+    try {
+      ["panel_token_github", "catalogo_reciente_v1", "config_reciente_v1"].forEach(function (k) { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+    } catch (e) { /* nada */ }
+    location.reload();
+  });
   aplicarConfig();
   pintarIconos(document);
   pintarPerfil();
