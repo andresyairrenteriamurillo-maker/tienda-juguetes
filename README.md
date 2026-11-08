@@ -46,15 +46,9 @@ La tienda tiene un panel para agregar, editar y borrar productos con foto, desde
 
 (También está el enlace «Administrar» al final de la tienda.)
 
-La primera vez el panel te pide una **llave de acceso de GitHub**. El mismo panel explica cómo crearla. En resumen:
+La primera vez el panel te pide una **llave de acceso de GitHub**. Pulsa **Crear mi llave en GitHub** (ya viene con el nombre, 1 año de duración y el permiso correcto), elige el repositorio de la tienda en *Only select repositories*, pulsa **Generate token**, copia la llave y pégala en el panel. Se hace una sola vez por dispositivo.
 
-1. Abre https://github.com/settings/personal-access-tokens/new
-2. Nombre: «Panel tienda». Vencimiento: el que quieras.
-3. *Repository access* → **Only select repositories** → `tienda-juguetes`.
-4. *Permissions* → *Repository permissions* → **Contents: Read and write**.
-5. **Generate token**, copia la llave (`github_pat_...`) y pégala en el panel.
-
-La llave solo funciona para esta tienda y queda guardada únicamente en tu dispositivo. Nunca la compartas ni la escribas en ningún archivo. Si pierdes el celular, bórrala en GitHub (*Settings → Developer settings → Personal access tokens*) y crea otra.
+**Editar desde la tienda:** en el dispositivo donde conectaste el panel, la tienda muestra una barra de *Modo administrador* con el botón **Agregar juguete**, y cada juguete tiene un botón **Editar este juguete**. Al guardar vuelves directo a la tienda y ves el cambio al instante en ese dispositivo; los clientes lo ven unos minutos después.
 
 Cada vez que guardas, el panel sube la foto (reducida para que cargue rápido) a `img/productos/` y actualiza `js/productos.js`. La tienda se actualiza en unos minutos.
 
@@ -132,7 +126,3 @@ La página nunca dice que el pedido está confirmado o pagado. Eso lo haces tú 
 ## Probar en tu computador (opcional)
 
 Haz doble clic en `index.html` y se abre en el navegador. Todo funciona sin conexión, excepto las fuentes tipográficas y el envío a WhatsApp.
-
-## ¿Y un panel de administración?
-
-Para que esto siga siendo simple, los productos se editan en `js/productos.js` directamente en GitHub. Un panel con usuario y contraseña necesitaría un servicio externo con base de datos, como Supabase o Firebase. Se puede agregar más adelante si el catálogo crece mucho.

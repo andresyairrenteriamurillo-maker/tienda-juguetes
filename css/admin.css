@@ -65,3 +65,10 @@
   .form-producto { padding: 16px; }
   .form-producto__botones .btn { flex: 1; }
 }
+
+/* Conexión simplificada y arrastrar fotos */
+.ayuda p { margin: 0 0 6px; }
+.ayuda li .btn { margin: 2px 0 4px; }
+.token-fila { display: flex; gap: 8px; }
+.token-fila input { flex: 1; min-width: 0; }
+.foto-subir__zona--encima { outline: 3px dashed var(--tomate); outline-offset: -6px; }

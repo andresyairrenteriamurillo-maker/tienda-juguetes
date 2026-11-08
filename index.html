@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/estilos.css?v=11">
+  <link rel="stylesheet" href="css/estilos.css?v=12">
   <script>
     // Aplica el modo noche antes de pintar la página (evita parpadeo)
     (function () {
@@ -58,6 +58,16 @@
       </select>
     </div>
   </header>
+
+  <div class="barra-admin" id="barra-admin" hidden>
+    <div class="perfil-ancho barra-admin__fila">
+      <span>🛠️ <strong>Modo administrador</strong><span class="solo-pc"> · toca un juguete para editarlo</span></span>
+      <span class="barra-admin__botones">
+        <a class="btn btn--primario" href="admin.html#nuevo"><span data-icon="plus"></span> Agregar juguete</a>
+        <a class="btn btn--gris" href="admin.html">Panel</a>
+      </span>
+    </div>
+  </div>
 
   <main class="perfil-ancho">
     <section class="perfil" aria-label="Perfil de la tienda">
@@ -249,9 +259,24 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="js/config.js?v=11"></script>
-  <script src="js/productos.js?v=11"></script>
-  <script src="js/pedido.js?v=11"></script>
-  <script src="js/app.js?v=11"></script>
+  <script src="js/config.js?v=12"></script>
+  <script src="js/productos.js?v=12"></script>
+  <script>
+    // Solo en el dispositivo del administrador: muestra al instante lo que se acaba
+    // de guardar en el panel, mientras GitHub Pages publica el cambio (unos minutos).
+    (function () {
+      try {
+        var r = JSON.parse(localStorage.getItem("catalogo_reciente_v1") || "null");
+        if (!r || Date.now() - r.t > 20 * 60 * 1000) return;
+        r.productos.forEach(function (p) {
+          if (p.imagen && !/^(https?:|data:)/.test(p.imagen)) p.imagen = r.raw + p.imagen;
+        });
+        window.PRODUCTOS = r.productos;
+        if (r.categorias && r.categorias.length) window.CATEGORIAS = r.categorias;
+      } catch (e) { /* se usa el catálogo normal */ }
+    })();
+  </script>
+  <script src="js/pedido.js?v=12"></script>
+  <script src="js/app.js?v=12"></script>
 </body>
 </html>

@@ -365,3 +365,13 @@ button { cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+/* ---------- Modo administrador (solo en el dispositivo del dueño) ---------- */
+.barra-admin { background: var(--sol-claro, #FFF4C7); border-bottom: 1px solid var(--linea); font-size: .9rem; }
+.barra-admin__fila { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-block: 8px; flex-wrap: wrap; }
+.barra-admin__botones { display: flex; gap: 8px; }
+.barra-admin .btn { padding: 7px 12px; font-size: .85rem; }
+.barra-admin .ico { width: 16px; height: 16px; }
+.btn--editar { border: 2px dashed var(--linea); background: transparent; color: inherit; justify-content: center; text-decoration: none; }
+.btn--editar:hover { border-color: var(--tinta-suave); }
+[data-tema="oscuro"] .barra-admin { background: #2a2512; }

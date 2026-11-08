@@ -25,6 +25,8 @@
   var fotoNueva = null;     // { base64, ext } de la foto elegida
   var quitarFoto = false;
   var ocupado = false;
+  var desdeTienda = false;  // true si se llegó desde el botón «Editar» o «Agregar» de la tienda
+  var CLAVE_RECIENTE = "catalogo_reciente_v1";
 
   var $ = function (s, c) { return (c || document).querySelector(s); };
   var $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
@@ -147,6 +149,7 @@
       branch: RAMA
     }).then(function (d) {
       shaArchivo = d.content.sha;
+      recordarCatalogo();
     }).catch(function (e) {
       if (e.status === 409 && !reintento) {
         // Otro cambio llegó primero: se toma la versión nueva y se repite
@@ -159,6 +162,23 @@
       }
       throw e;
     });
+  }
+
+  // Copia del catálogo recién guardado: la tienda la usa en este dispositivo
+  // mientras GitHub Pages termina de publicar (tarda unos minutos).
+  function recordarCatalogo() {
+    try {
+      localStorage.setItem(CLAVE_RECIENTE, JSON.stringify({
+        t: Date.now(),
+        raw: "https://raw.githubusercontent.com/" + GH.usuario + "/" + GH.repositorio + "/" + RAMA + "/",
+        categorias: categorias,
+        productos: productos
+      }));
+    } catch (e) { /* sin almacenamiento */ }
+  }
+
+  function volverALaTienda(id) {
+    location.href = "index.html" + (id ? "#p=" + encodeURIComponent(id) : "");
   }
 
   function subirFoto(id, foto) {
@@ -335,9 +355,14 @@
     }).then(function () {
       if (anterior && anterior !== datos.imagen) borrarArchivo(anterior);
       bloquear(false);
+      if (desdeTienda) {
+        aviso("«" + nombre + "» guardado. Volviendo a la tienda…", 4500);
+        setTimeout(function () { volverALaTienda(datos.activo ? id : ""); }, 900);
+        return;
+      }
       $("#dlg-producto").close();
       pintarLista();
-      aviso("«" + nombre + "» guardado. Aparecerá en la tienda en unos minutos.", 4500);
+      aviso("«" + nombre + "» guardado. En este dispositivo ya lo ves en la tienda; para los clientes aparece en unos minutos.", 5000);
     }).catch(function (e) {
       productos = copia;
       bloquear(false);
@@ -407,12 +432,38 @@
       if (desdeFormulario) guardarToken(t, recordar);
       mostrar("productos");
       pintarLista();
+      abrirDesdeTienda();
     }).catch(function (e) {
       token = "";
       if (!desdeFormulario) borrarToken();
       mostrar("conectar");
       $("#error-conectar").textContent = mensajeError(e);
     });
+  }
+
+  // admin.html#editar=J001 o admin.html#nuevo (enlaces desde la tienda)
+  function abrirDesdeTienda() {
+    var h = location.hash;
+    var m = /#editar=([^&]+)/.exec(h);
+    if (m) {
+      var id = decodeURIComponent(m[1]);
+      var p = productos.filter(function (x) { return x.id === id; })[0];
+      if (p) { desdeTienda = true; abrirFormulario(p); }
+    } else if (h === "#nuevo") {
+      desdeTienda = true;
+      abrirFormulario(null);
+    }
+    if (desdeTienda) history.replaceState(null, "", location.pathname);
+  }
+
+  function usarArchivoFoto(f) {
+    if (!f) return;
+    $("#error-producto").textContent = "";
+    prepararFoto(f).then(function (foto) {
+      fotoNueva = foto;
+      quitarFoto = false;
+      vistaFoto(foto.vista);
+    }).catch(function (e) { $("#error-producto").textContent = e.message; });
   }
 
   /* ---------- Eventos ---------- */
@@ -451,15 +502,23 @@
       } else if (b.hasAttribute("data-borrar")) borrarProducto(b.getAttribute("data-borrar"));
     });
 
-    $("#p-foto").addEventListener("change", function () {
-      var f = this.files && this.files[0];
-      if (!f) return;
-      $("#error-producto").textContent = "";
-      prepararFoto(f).then(function (foto) {
-        fotoNueva = foto;
-        quitarFoto = false;
-        vistaFoto(foto.vista);
-      }).catch(function (e) { $("#error-producto").textContent = e.message; });
+    $("#p-foto").addEventListener("change", function () { usarArchivoFoto(this.files && this.files[0]); });
+    // En computador: arrastrar la foto o pegarla (Ctrl+V)
+    var zona = $("#zona-foto");
+    ["dragenter", "dragover"].forEach(function (t) {
+      zona.addEventListener(t, function (e) { e.preventDefault(); zona.classList.add("foto-subir__zona--encima"); });
+    });
+    ["dragleave", "drop"].forEach(function (t) {
+      zona.addEventListener(t, function () { zona.classList.remove("foto-subir__zona--encima"); });
+    });
+    zona.addEventListener("drop", function (e) {
+      e.preventDefault();
+      usarArchivoFoto(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]);
+    });
+    document.addEventListener("paste", function (e) {
+      if (!$("#dlg-producto").open || !e.clipboardData) return;
+      var f = Array.prototype.filter.call(e.clipboardData.files || [], function (x) { return /^image\//.test(x.type); })[0];
+      if (f) { e.preventDefault(); usarArchivoFoto(f); }
     });
     $("#btn-quitar-foto").addEventListener("click", function () {
       fotoNueva = null;
@@ -479,6 +538,10 @@
     $$("[data-cerrar]").forEach(function (b) {
       b.addEventListener("click", function () { if (!ocupado) b.closest("dialog").close(); });
     });
+    // Si se vino desde la tienda y se cancela, se regresa a la tienda
+    $("#dlg-producto").addEventListener("close", function () {
+      if (desdeTienda && !ocupado) volverALaTienda(editando ? editando.id : "");
+    });
     $("#dlg-producto").addEventListener("cancel", function (e) { if (ocupado) e.preventDefault(); });
 
     $("#btn-tema").addEventListener("click", function () {
@@ -493,6 +556,17 @@
   /* ---------- Inicio ---------- */
   pintarIconos(document);
   $("#nombre-repo").textContent = GH.repositorio || "";
+  $("#enlace-crear-llave").href = "https://github.com/settings/personal-access-tokens/new" +
+    "?name=" + encodeURIComponent("Panel " + (GH.repositorio || "tienda")) +
+    "&description=" + encodeURIComponent("Panel de productos de la tienda") +
+    "&target_name=" + encodeURIComponent(GH.usuario || "") +
+    "&expires_in=366&contents=write";
+  var btnPegar = $("#btn-pegar");
+  if (navigator.clipboard && navigator.clipboard.readText) {
+    btnPegar.addEventListener("click", function () {
+      navigator.clipboard.readText().then(function (t) { $("#token").value = t.trim(); }, function () { $("#token").focus(); });
+    });
+  } else btnPegar.hidden = true;
   eventos();
   var guardado = leerToken();
   if (guardado) conectar(guardado, false, false);

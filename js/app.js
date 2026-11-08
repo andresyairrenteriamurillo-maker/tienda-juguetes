@@ -10,6 +10,10 @@
   var CATS = window.CATEGORIAS;
   var CLAVE_CARRITO = "carrito_juguetes_v1"; // solo guarda { id: cantidad }, nunca datos personales
 
+  // Modo administrador: este dispositivo tiene la llave del panel guardada
+  var esAdmin = false;
+  try { esAdmin = !!(sessionStorage.getItem("panel_token_github") || localStorage.getItem("panel_token_github")); } catch (e) { /* nada */ }
+
   var productos = window.PRODUCTOS.filter(function (p) { return p.activo; });
   var porId = {};
   productos.forEach(function (p) { porId[p.id] = p; });
@@ -49,6 +53,7 @@
     grid: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>',
     tag: '<path d="M12.6 2.6A2 2 0 0 0 11.2 2H4a2 2 0 0 0-2 2v7.2a2 2 0 0 0 .6 1.4l8.7 8.7a2.4 2.4 0 0 0 3.4 0l6.6-6.6a2.4 2.4 0 0 0 0-3.4Z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>',
     back: '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
+    pencil: '<path d="M21.2 6.8a2.8 2.8 0 0 0-4-4L3.8 16.2a2 2 0 0 0-.5.8l-1.3 4.4a.5.5 0 0 0 .6.6l4.4-1.3a2 2 0 0 0 .8-.5Z"/>',
     share: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/>'
   };
   function icono(nombre) {
@@ -350,6 +355,7 @@
               '<a class="btn btn--gris" href="' + esc(pregunta) + '" target="_blank" rel="noopener">' + icono("chat") + " Preguntar</a>" +
               '<button class="btn btn--gris" data-compartir="' + esc(p.id) + '">' + icono("share") + " Compartir</button>" +
             "</div>" +
+            (esAdmin ? '<a class="btn btn--editar" href="admin.html#editar=' + encodeURIComponent(p.id) + '">' + icono("pencil") + " Editar este juguete (foto, precio, unidades)</a>" : "") +
           "</div>" +
         "</div>" +
       "</div>";
@@ -592,6 +598,7 @@
   }
 
   /* ---------- Inicio ---------- */
+  $("#barra-admin").hidden = !esAdmin;
   aplicarConfig();
   pintarIconos(document);
   pintarPerfil();
