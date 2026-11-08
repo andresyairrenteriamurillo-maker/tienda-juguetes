@@ -131,12 +131,14 @@
     var dcto = descuento(p);
     var final = P.precioFinal(p);
     var enCarrito = carrito[p.id] || 0;
-    return '<article class="post' + (disponible ? "" : " post--agotado") + '">' +
+    var cat = catPorClave[p.categoria];
+    return '<article class="post' + (disponible ? "" : " post--agotado") + '" style="--c:' + esc(cat ? cat.color : "#E5482D") + '">' +
       '<button class="post__abrir" data-detalle="' + esc(p.id) + '" aria-label="Ver ' + esc(p.nombre) + '">' +
         '<span class="post__media">' + imagenProducto(p, "foto") +
           (dcto ? '<span class="post__dcto">-' + dcto + "%</span>" : "") +
           (p.demo ? '<span class="post__demo">Ejemplo</span>' : "") +
           (!disponible ? '<span class="post__agotado">Agotado</span>' : "") +
+          (cat ? '<span class="post__cat">' + cat.emoji + " " + esc(cat.nombre) + "</span>" : "") +
         "</span>" +
         '<span class="post__nombre">' + esc(p.nombre) + "</span>" +
         (p.descripcion ? '<span class="post__desc">' + esc(p.descripcion) + "</span>" : "") +
@@ -201,7 +203,7 @@
       var foto = c.clave === "" ? "" : fotoDe(productos.filter(function (p) {
         return c.clave === "__promo" ? descuento(p) > 0 : p.categoria === c.clave;
       }));
-      return '<button class="historia' + (activo ? " historia--activa" : "") + '" data-categoria="' + esc(c.clave) + '" aria-pressed="' + activo + '">' +
+      return '<button class="historia' + (activo ? " historia--activa" : "") + '" style="--c:' + esc(c.color) + '" data-categoria="' + esc(c.clave) + '" aria-pressed="' + activo + '">' +
         '<span class="historia__aro"><span class="historia__circulo" style="--c:' + esc(c.color) + '">' + c.emoji +
           (foto ? '<img src="' + esc(foto) + '" alt="" loading="lazy" decoding="async" onerror="this.remove()">' : "") +
           (foto ? '<span class="historia__mini" aria-hidden="true">' + c.emoji + "</span>" : "") +
