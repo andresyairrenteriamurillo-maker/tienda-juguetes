@@ -432,12 +432,15 @@
       if (desdeFormulario) guardarToken(t, recordar);
       mostrar("productos");
       pintarLista();
+      pintarAvisoClave();
       abrirDesdeTienda();
     }).catch(function (e) {
       token = "";
       if (!desdeFormulario) borrarToken();
-      mostrar("conectar");
-      $("#error-conectar").textContent = mensajeError(e);
+      mostrarConectar();
+      var msj = mensajeError(e);
+      if (acceso && e && e.status === 401) msj = "La llave guardada con la contraseña ya venció. Crea una llave nueva abajo y luego cambia la contraseña.";
+      $(acceso ? "#error-clave" : "#error-conectar").textContent = msj;
     });
   }
 
@@ -466,8 +469,110 @@
     }).catch(function (e) { $("#error-producto").textContent = e.message; });
   }
 
+  /* ---------- Contraseña del panel ----------
+     La llave de GitHub se guarda en el repositorio (acceso.json) CIFRADA
+     con la contraseña (AES-GCM + PBKDF2). Sin la contraseña no sirve. */
+  var ARCHIVO_ACCESO = "acceso.json";
+  var acceso = null;
+  var ITER = 600000;
+
+  function bytesA64(b) { var s = ""; new Uint8Array(b).forEach(function (x) { s += String.fromCharCode(x); }); return btoa(s); }
+  function b64ABytes(t) { var s = atob(t), b = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) b[i] = s.charCodeAt(i); return b; }
+
+  function derivar(clave, sal, iter) {
+    return crypto.subtle.importKey("raw", new TextEncoder().encode(clave), "PBKDF2", false, ["deriveKey"]).then(function (base) {
+      return crypto.subtle.deriveKey({ name: "PBKDF2", salt: sal, iterations: iter, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+    });
+  }
+  function cifrar(texto, clave) {
+    var sal = crypto.getRandomValues(new Uint8Array(16));
+    var iv = crypto.getRandomValues(new Uint8Array(12));
+    return derivar(clave, sal, ITER).then(function (k) {
+      return crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, k, new TextEncoder().encode(texto));
+    }).then(function (c) {
+      return { v: 1, iter: ITER, sal: bytesA64(sal), iv: bytesA64(iv), datos: bytesA64(c), fecha: new Date().toISOString().slice(0, 10) };
+    });
+  }
+  function descifrar(a, clave) {
+    return derivar(clave, b64ABytes(a.sal), a.iter).then(function (k) {
+      return crypto.subtle.decrypt({ name: "AES-GCM", iv: b64ABytes(a.iv) }, k, b64ABytes(a.datos));
+    }).then(function (t) { return new TextDecoder().decode(t); });
+  }
+
+  function cargarAcceso() {
+    var raw = "https://raw.githubusercontent.com/" + GH.usuario + "/" + GH.repositorio + "/" + RAMA + "/" + ARCHIVO_ACCESO + "?t=" + Date.now();
+    var leer = function (url) { return fetch(url, { cache: "no-store" }).then(function (r) { if (!r.ok) throw new Error(); return r.json(); }); };
+    return leer(raw).catch(function () { return leer(ARCHIVO_ACCESO + "?t=" + Date.now()); })
+      .then(function (a) { acceso = a && a.datos ? a : null; })
+      .catch(function () { acceso = null; });
+  }
+
+  function pintarAvisoClave() {
+    $("#aviso-clave").hidden = false;
+    $("#texto-clave").textContent = acceso
+      ? "Ya tienes contraseña del panel (creada el " + (acceso.fecha || "") + "). En otro dispositivo entra a «Administrar» y escríbela. Si quieres, cámbiala aquí."
+      : "Crea una contraseña y en cualquier otro celular o computador solo tendrás que escribirla, sin crear otra llave.";
+    $("#btn-crear-clave").textContent = acceso ? "Cambiar contraseña" : "Guardar contraseña";
+  }
+
+  function crearClave(e) {
+    e.preventDefault();
+    var c1 = $("#clave-nueva").value, c2 = $("#clave-repetir").value;
+    var err = "";
+    if (c1.length < 10) err = "Usa al menos 10 caracteres. Mejor una frase, por ejemplo «osito-azul-de-mi-tienda».";
+    else if (c1 !== c2) err = "Las dos contraseñas no son iguales.";
+    $("#error-crear-clave").textContent = err;
+    if (err) return;
+    var b = $("#btn-crear-clave");
+    b.disabled = true; b.textContent = "Guardando…";
+    cifrar(token, c1).then(function (a) {
+      return gh("GET", ARCHIVO_ACCESO + "?ref=" + encodeURIComponent(RAMA)).then(function (d) { return d.sha; }, function () { return undefined; }).then(function (sha) {
+        var cuerpo = { message: "Contraseña del panel", content: aBase64(JSON.stringify(a, null, 2) + "\n"), branch: RAMA };
+        if (sha) cuerpo.sha = sha;
+        return gh("PUT", ARCHIVO_ACCESO, cuerpo);
+      }).then(function () { acceso = a; });
+    }).then(function () {
+      $("#form-crear-clave").reset();
+      b.disabled = false;
+      pintarAvisoClave();
+      aviso("Contraseña guardada. Ya puedes entrar desde otro dispositivo.", 5000);
+    }).catch(function (er) {
+      b.disabled = false;
+      pintarAvisoClave();
+      $("#error-crear-clave").textContent = mensajeError(er);
+    });
+  }
+
+  function entrarConClave(e) {
+    e.preventDefault();
+    var clave = $("#clave-entrar").value;
+    if (!clave || !acceso) return;
+    var b = $("#btn-entrar");
+    b.disabled = true; b.textContent = "Entrando…";
+    $("#error-clave").textContent = "";
+    descifrar(acceso, clave).then(function (t) {
+      return conectar(t, $("#recordar-clave").checked, true);
+    }, function () {
+      $("#error-clave").textContent = "Contraseña incorrecta.";
+    }).then(function () {
+      b.disabled = false; b.textContent = "Entrar";
+      $("#clave-entrar").value = "";
+    });
+  }
+
+  function mostrarConectar() {
+    mostrar("conectar");
+    var conClave = !!acceso;
+    $("#bloque-clave").hidden = !conClave;
+    // Con contraseña, el bloque de la llave queda dentro de «¿Olvidaste la contraseña?»
+    if (conClave) $("#hueco-llave").appendChild($("#bloque-llave"));
+    if (conClave) setTimeout(function () { $("#clave-entrar").focus(); }, 50);
+  }
+
   /* ---------- Eventos ---------- */
   function eventos() {
+    $("#form-clave").addEventListener("submit", entrarConClave);
+    $("#form-crear-clave").addEventListener("submit", crearClave);
     $("#form-conectar").addEventListener("submit", function (e) {
       e.preventDefault();
       var t = $("#token").value.trim();
@@ -483,7 +588,7 @@
       borrarToken();
       token = "";
       productos = [];
-      mostrar("conectar");
+      mostrarConectar();
       aviso("Este dispositivo quedó desconectado.");
     });
 
@@ -569,6 +674,8 @@
   } else btnPegar.hidden = true;
   eventos();
   var guardado = leerToken();
-  if (guardado) conectar(guardado, false, false);
-  else mostrar("conectar");
+  cargarAcceso().then(function () {
+    if (guardado) conectar(guardado, false, false);
+    else mostrarConectar();
+  });
 })();

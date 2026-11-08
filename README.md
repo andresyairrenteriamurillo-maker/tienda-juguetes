@@ -48,6 +48,8 @@ La tienda tiene un panel para agregar, editar y borrar productos con foto, desde
 
 La primera vez el panel te pide una **llave de acceso de GitHub**. Pulsa **Crear mi llave en GitHub** (ya viene con el nombre, 1 año de duración y el permiso correcto), elige el repositorio de la tienda en *Only select repositories*, pulsa **Generate token**, copia la llave y pégala en el panel. Se hace una sola vez por dispositivo.
 
+**Otros dispositivos:** después de conectar, el panel te deja crear una **contraseña del panel**. En cualquier otro celular o computador entras a «Administrar» y solo escribes esa contraseña. La llave queda guardada cifrada en `acceso.json`; sin la contraseña no sirve, así que usa una larga (una frase).
+
 **Editar desde la tienda:** en el dispositivo donde conectaste el panel, la tienda muestra una barra de *Modo administrador* con el botón **Agregar juguete**, y cada juguete tiene un botón **Editar este juguete**. Al guardar vuelves directo a la tienda y ves el cambio al instante en ese dispositivo; los clientes lo ven unos minutos después.
 
 Cada vez que guardas, el panel sube la foto (reducida para que cargue rápido) a `img/productos/` y actualiza `js/productos.js`. La tienda se actualiza en unos minutos.

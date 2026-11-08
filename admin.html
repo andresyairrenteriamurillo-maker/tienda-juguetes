@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/estilos.css?v=13">
-  <link rel="stylesheet" href="css/admin.css?v=13">
+  <link rel="stylesheet" href="css/estilos.css?v=14">
+  <link rel="stylesheet" href="css/admin.css?v=14">
   <script>(function(){var t=null;try{t=localStorage.getItem("tema")}catch(e){}if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"oscuro":"claro";document.documentElement.setAttribute("data-tema",t)})();</script>
 </head>
 <body>
@@ -30,6 +30,26 @@
   <main class="perfil-ancho admin">
     <!-- PASO 1: CONECTAR -->
     <section id="vista-conectar" class="admin-tarjeta" hidden>
+      <!-- Entrar con contraseña (cuando ya se creó en otro dispositivo) -->
+      <div id="bloque-clave" hidden>
+        <h1>Entrar al panel</h1>
+        <p>Escribe la contraseña del panel que creaste.</p>
+        <form id="form-clave" class="campos-admin">
+          <div class="campo">
+            <label for="clave-entrar">Contraseña</label>
+            <input id="clave-entrar" type="password" autocomplete="current-password" required>
+          </div>
+          <label class="check"><input type="checkbox" id="recordar-clave" checked> <span>Recordar en este dispositivo (no lo marques en computadores públicos)</span></label>
+          <p class="error" id="error-clave" role="alert"></p>
+          <button class="btn btn--primario" type="submit" id="btn-entrar">Entrar</button>
+        </form>
+        <details class="ayuda ayuda--otra">
+          <summary>¿Olvidaste la contraseña? Conectar con una llave nueva</summary>
+          <div id="hueco-llave"></div>
+        </details>
+      </div>
+
+      <div id="bloque-llave">
       <h1>Conecta tu tienda</h1>
       <p>Para guardar productos, este panel necesita una <strong>llave de acceso de GitHub</strong> con permiso solo para tu tienda. Se crea una vez y queda guardada únicamente en este dispositivo.</p>
 
@@ -55,6 +75,7 @@
         <p class="error" id="error-conectar" role="alert"></p>
         <button class="btn btn--primario" type="submit" id="btn-conectar">Conectar</button>
       </form>
+      </div>
     </section>
 
     <!-- PASO 2: PRODUCTOS -->
@@ -65,6 +86,19 @@
           <p class="nota" id="resumen-productos"></p>
         </div>
         <button class="btn btn--primario" id="btn-nuevo"><span data-icon="plus"></span> Agregar juguete</button>
+      </div>
+
+      <div class="aviso-clave" id="aviso-clave" hidden>
+        <div>
+          <strong>🔑 Usa el panel en otros dispositivos</strong>
+          <p id="texto-clave">Crea una contraseña y en cualquier otro celular o computador solo tendrás que escribirla, sin crear otra llave.</p>
+        </div>
+        <form id="form-crear-clave" class="crear-clave">
+          <input id="clave-nueva" type="password" autocomplete="new-password" placeholder="Contraseña nueva (mínimo 10)" minlength="10" required>
+          <input id="clave-repetir" type="password" autocomplete="new-password" placeholder="Repítela" required>
+          <button class="btn btn--primario" type="submit" id="btn-crear-clave">Guardar contraseña</button>
+          <p class="error" id="error-crear-clave" role="alert"></p>
+        </form>
       </div>
 
       <div class="aviso-demo-admin" id="aviso-ejemplos" hidden>
@@ -144,8 +178,8 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="js/config.js?v=13"></script>
-  <script src="js/pedido.js?v=13"></script>
-  <script src="js/admin.js?v=13"></script>
+  <script src="js/config.js?v=14"></script>
+  <script src="js/pedido.js?v=14"></script>
+  <script src="js/admin.js?v=14"></script>
 </body>
 </html>

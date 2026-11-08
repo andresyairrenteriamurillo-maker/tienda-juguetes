@@ -72,3 +72,12 @@
 .token-fila { display: flex; gap: 8px; }
 .token-fila input { flex: 1; min-width: 0; }
 .foto-subir__zona--encima { outline: 3px dashed var(--tomate); outline-offset: -6px; }
+
+/* Contraseña del panel */
+.aviso-clave { display: grid; gap: 10px; background: var(--superficie); border: 1px solid var(--linea); border-radius: 14px; padding: 14px 16px; margin-bottom: 16px; }
+.aviso-clave p { margin: 4px 0 0; font-size: .9rem; color: var(--tinta-suave); }
+.crear-clave { display: flex; gap: 8px; flex-wrap: wrap; }
+.crear-clave input { flex: 1 1 180px; min-width: 0; border: 1px solid var(--linea); border-radius: 12px; padding: 10px 12px; background: var(--gris); color: var(--tinta); }
+.crear-clave .error { flex-basis: 100%; margin: 0; }
+.ayuda--otra { margin-top: 18px; }
+.ayuda--otra #bloque-llave h1 { font-size: 1.2rem; margin-top: 12px; }
