@@ -1,35 +1,33 @@
 /* =========================================================
    CONFIGURACIÓN DE LA TIENDA
    ---------------------------------------------------------
-   Este es el ÚNICO archivo que necesitas editar para poner
-   los datos reales de tu negocio. Cambia lo que está entre
-   comillas y guarda.
+   Lo más fácil es cambiar estos datos desde el panel:
+   Administrar → Datos de la tienda. También puedes editar
+   aquí lo que está entre comillas y guardar.
    ========================================================= */
 
 window.TIENDA_CONFIG = {
   // Nombre que aparece en el encabezado, el pie de página y el mensaje de WhatsApp
-  nombre: "Juguetería Demo",
+  nombre: "CACHARRERIA ORO-COPIAS",
 
   // Frase corta debajo del nombre
   eslogan: "Juguetes que alegran el día",
 
-  // Número de WhatsApp del propietario en formato internacional:
-  // 57 (Colombia) + número de 10 dígitos. SIN espacios, guiones ni "+".
-  // Ejemplo: "573001234567"
-  whatsapp: "573001234567",
+  // WhatsApp en formato internacional: 57 + 10 dígitos, sin espacios ni "+"
+  whatsapp: "573134173628",
 
-  // Cómo se muestra el teléfono en la página (este sí puede llevar espacios)
-  telefonoVisible: "300 123 4567",
+  // Cómo se muestra el teléfono en la página
+  telefonoVisible: "313 417 3628",
 
-  // Correo de contacto (para el pie de página y la política de datos)
+  // Correo de contacto (pie de página y política de datos)
   correo: "contacto@tutienda.com",
 
   // Dirección donde los clientes recogen sus pedidos
   direccion: "Calle 00 # 00-00, Barrio Ejemplo",
-  ciudad: "Bogotá, Colombia",
+  ciudad: "Florencia-Caquetá, Colombia",
 
-  // Enlace de Google Maps de tu tienda (opcional). Déjalo "" si no tienes.
-  mapaUrl: "",
+  // Enlace de Google Maps (opcional). "" si no tienes.
+  mapaUrl: "https://currentlocation.org/es/u#1.63069,-75.60483",
 
   // Horarios de atención y de recogida
   horarios: [
@@ -54,15 +52,13 @@ window.TIENDA_CONFIG = {
     nit: "NIT o cédula del responsable"
   },
 
-  // Dónde está guardada la tienda en GitHub (lo usa el panel admin.html
-  // para guardar los productos). No es una contraseña.
+  // Dónde está guardada la tienda en GitHub (lo usa el panel). No es una contraseña.
   github: {
     usuario: "andresyairrenteriamurillo-maker",
     repositorio: "tienda-juguetes",
     rama: "main"
   },
 
-  // Mientras sea true, se muestra el aviso de "tienda de demostración".
-  // Cámbialo a false cuando cargues tus productos reales.
+  // true = muestra el aviso de "tienda de demostración"
   modoDemo: true
 };
