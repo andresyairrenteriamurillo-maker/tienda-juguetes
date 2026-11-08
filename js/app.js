@@ -48,6 +48,7 @@
     sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>',
     grid: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>',
     tag: '<path d="M12.6 2.6A2 2 0 0 0 11.2 2H4a2 2 0 0 0-2 2v7.2a2 2 0 0 0 .6 1.4l8.7 8.7a2.4 2.4 0 0 0 3.4 0l6.6-6.6a2.4 2.4 0 0 0 0-3.4Z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>',
+    back: '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
     share: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/>'
   };
   function icono(nombre) {
@@ -247,7 +248,8 @@
     carrito[id] = Math.min(maximo, actual + (cantidad || 1));
     guardarCarrito();
     actualizarCarrito(true);
-    aviso("Agregaste «" + p.nombre + "» al carrito");
+    var sumadas = carrito[id] - actual;
+    aviso(sumadas > 1 ? "Agregaste " + sumadas + " × «" + p.nombre + "» al carrito" : "Agregaste «" + p.nombre + "» al carrito");
     return true;
   }
 
@@ -319,9 +321,9 @@
         "</div>" +
         '<div class="pub__lado">' +
           '<div class="pub__cabecera">' +
+            '<button class="btn-volver" data-cerrar aria-label="Volver al catálogo">' + icono("back") + '<span>Volver</span></button>' +
             '<span class="pub__avatar" aria-hidden="true">🧸</span>' +
             '<div><strong>' + esc(CFG.nombre) + "</strong><span>" + esc(cat ? cat.nombre : "") + "</span></div>" +
-            '<button class="btn-icono" data-cerrar aria-label="Cerrar">' + icono("x") + "</button>" +
           "</div>" +
           '<div class="pub__texto">' +
             '<h2 id="detalle-titulo">' + esc(p.nombre) + "</h2>" +
@@ -333,7 +335,17 @@
             '<p class="nota">Ref. ' + esc(p.id) + " · Recogida en tienda · Disponibilidad sujeta a confirmación.</p>" +
           "</div>" +
           '<div class="pub__acciones">' +
-            '<button class="btn btn--primario btn--bloque" data-agregar="' + esc(p.id) + '"' + (disponible ? "" : " disabled") + ">" + icono("cart") + (disponible ? " Agregar al carrito" : " Agotado") + "</button>" +
+            (disponible ?
+              '<div class="pub__cantidad">' +
+                '<span class="pub__cantidad-txt">Cantidad</span>' +
+                '<div class="cantidad cantidad--grande" role="group" aria-label="Cantidad a agregar">' +
+                  '<button class="btn-icono" data-det-menos aria-label="Disminuir cantidad">' + icono("minus") + "</button>" +
+                  '<span id="det-cant" aria-live="polite">1</span>' +
+                  '<button class="btn-icono" data-det-mas aria-label="Aumentar cantidad">' + icono("plus") + "</button>" +
+                "</div>" +
+              "</div>" +
+              '<p class="nota" id="det-en-carrito" hidden></p>' : "") +
+            '<button class="btn btn--primario btn--bloque" id="det-agregar" data-agregar="' + esc(p.id) + '"' + (disponible ? "" : " disabled") + ">" + icono("cart") + (disponible ? " Agregar al carrito" : " Agotado") + "</button>" +
             '<div class="pub__secundarias">' +
               '<a class="btn btn--gris" href="' + esc(pregunta) + '" target="_blank" rel="noopener">' + icono("chat") + " Preguntar</a>" +
               '<button class="btn btn--gris" data-compartir="' + esc(p.id) + '">' + icono("share") + " Compartir</button>" +
@@ -341,7 +353,38 @@
           "</div>" +
         "</div>" +
       "</div>";
+    detalleId = p.id;
+    cantDetalle = 1;
+    pintarCantidadDetalle();
     abrir($("#dlg-detalle"));
+  }
+
+  /* Selector de cantidad dentro del detalle */
+  var detalleId = null;
+  var cantDetalle = 1;
+
+  function restantes(id) {
+    var p = porId[id];
+    return p ? Math.max(0, P.maximoUnidades(p) - (carrito[id] || 0)) : 0;
+  }
+
+  function pintarCantidadDetalle() {
+    var span = $("#det-cant");
+    if (!span || !detalleId) return;
+    var max = restantes(detalleId);
+    if (cantDetalle > max) cantDetalle = Math.max(1, max);
+    span.textContent = cantDetalle;
+    $("[data-det-menos]").disabled = cantDetalle <= 1;
+    $("[data-det-mas]").disabled = cantDetalle >= max;
+    var enCarrito = carrito[detalleId] || 0;
+    var nota = $("#det-en-carrito");
+    nota.hidden = !enCarrito;
+    nota.textContent = max === 0
+      ? "Ya tienes en el carrito todas las unidades disponibles (" + enCarrito + ")."
+      : "Ya tienes " + enCarrito + (enCarrito === 1 ? " unidad" : " unidades") + " en el carrito.";
+    var btn = $("#det-agregar");
+    btn.disabled = max === 0;
+    btn.innerHTML = icono("cart") + (cantDetalle > 1 ? " Agregar " + cantDetalle + " al carrito" : " Agregar al carrito");
   }
 
   function compartir(id) {
@@ -462,9 +505,18 @@
       var b = e.target.closest("button, a");
       if (!b) return;
       if (b.hasAttribute("data-agregar")) {
-        if (agregar(b.getAttribute("data-agregar"))) {
+        var idAg = b.getAttribute("data-agregar");
+        var cant = b.id === "det-agregar" ? cantDetalle : 1;
+        if (agregar(idAg, cant)) {
           b.classList.remove("btn--pulso"); void b.offsetWidth; b.classList.add("btn--pulso");
+          if (b.id === "det-agregar") { cantDetalle = 1; pintarCantidadDetalle(); }
         }
+      }
+      else if (b.hasAttribute("data-det-menos")) { cantDetalle = Math.max(1, cantDetalle - 1); pintarCantidadDetalle(); }
+      else if (b.hasAttribute("data-det-mas")) {
+        if (cantDetalle < restantes(detalleId)) cantDetalle++;
+        else aviso("No hay más unidades disponibles.");
+        pintarCantidadDetalle();
       } else if (b.hasAttribute("data-detalle")) abrirDetalle(b.getAttribute("data-detalle"));
       else if (b.hasAttribute("data-mas")) cambiarCantidad(b.getAttribute("data-mas"), 1);
       else if (b.hasAttribute("data-menos")) cambiarCantidad(b.getAttribute("data-menos"), -1);
@@ -555,4 +607,31 @@
   }
   abrirDesdeEnlace();
   window.addEventListener("hashchange", abrirDesdeEnlace);
+
+  // El botón «atrás» del celular cierra el juguete y vuelve al catálogo
+  var dlgDetalle = $("#dlg-detalle");
+  var abrirOriginal = abrir;
+  abrir = function (dlg) {
+    if (dlg === dlgDetalle && !dlg.open && detalleId) {
+      try {
+        if (history.state && history.state.detalle) history.replaceState({ detalle: detalleId }, "", "#p=" + encodeURIComponent(detalleId));
+        else history.pushState({ detalle: detalleId }, "", "#p=" + encodeURIComponent(detalleId));
+      } catch (e) { /* sin historial */ }
+    }
+    abrirOriginal(dlg);
+  };
+  if (dlgDetalle.open && detalleId) {
+    // Abierto desde un enlace compartido: deja el catálogo como paso anterior
+    try {
+      history.replaceState(null, "", location.pathname + location.search);
+      history.pushState({ detalle: detalleId }, "", "#p=" + encodeURIComponent(detalleId));
+    } catch (e) {}
+  }
+  dlgDetalle.addEventListener("close", function () {
+    detalleId = null;
+    if (history.state && history.state.detalle) history.back();
+  });
+  window.addEventListener("popstate", function (e) {
+    if (!(e.state && e.state.detalle) && dlgDetalle.open) cerrar(dlgDetalle);
+  });
 })();
