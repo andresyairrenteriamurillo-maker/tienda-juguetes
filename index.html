@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/estilos.css?v=22">
+  <link rel="stylesheet" href="css/estilos.css?v=23">
   <script>
     // Aplica el modo noche antes de pintar la página (evita parpadeo)
     (function () {
@@ -34,6 +34,7 @@
         <span class="barra__nombre" data-config="nombre">Juguetería</span>
       </a>
       <div class="barra__acciones">
+        <a class="btn-admin" id="btn-admin" href="admin.html" aria-label="Administrar la tienda" title="Administrar la tienda"><span aria-hidden="true">🛠️</span><span class="btn-admin__txt">Administrar</span></a>
         <button class="icono-btn" id="btn-tema" aria-label="Activar modo noche" aria-pressed="false"><span class="ico-luna" data-icon="moon"></span><span class="ico-sol" data-icon="sun"></span></button>
         <button class="icono-btn" id="btn-buscar" aria-label="Buscar juguetes" aria-expanded="false" aria-controls="zona-buscar"><span data-icon="search"></span></button>
         <a class="icono-btn enlace-wa-consulta" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp"><span data-icon="chat"></span></a>
@@ -292,6 +293,6 @@
     })();
   </script>
   <script src="js/pedido.js?v=19"></script>
-  <script src="js/app.js?v=23"></script>
+  <script src="js/app.js?v=24"></script>
 </body>
 </html>

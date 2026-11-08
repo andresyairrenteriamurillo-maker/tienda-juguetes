@@ -829,6 +829,7 @@
 
   /* ---------- Inicio ---------- */
   $("#barra-admin").hidden = !esAdmin;
+  $("#btn-admin").classList.toggle("btn-admin--activo", esAdmin);
   aplicarConfig();
   pintarIconos(document);
   pintarPerfil();
