@@ -560,7 +560,7 @@
     "?name=" + encodeURIComponent("Panel " + (GH.repositorio || "tienda")) +
     "&description=" + encodeURIComponent("Panel de productos de la tienda") +
     "&target_name=" + encodeURIComponent(GH.usuario || "") +
-    "&expires_in=366&contents=write";
+    "&expires_in=365&contents=write";
   var btnPegar = $("#btn-pegar");
   if (navigator.clipboard && navigator.clipboard.readText) {
     btnPegar.addEventListener("click", function () {
